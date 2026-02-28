@@ -11,13 +11,17 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# === pet-adoption-web (Next.js) ===
-pet-adoption-web/.next/
-pet-adoption-web/out/
-pet-adoption-web/build/
+# === Ignore Unused Directories ===
+docs/
+pet-administration-web/
 
-# === pet-adoption-api (Laravel) ===
-pet-adoption-api/vendor/
-pet-adoption-api/public/storage
-pet-adoption-api/storage/*.key
-pet-adoption-api/bootstrap/cache/
+# === frontend (Next.js) ===
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# === backend (Laravel) ===
+backend/vendor/
+backend/public/storage
+backend/storage/*.key
+backend/bootstrap/cache/
