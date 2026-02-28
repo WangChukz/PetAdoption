@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Heart background -->
+  <path d="M50 90 L43.5 83.5 C16 57 0 41.5 0 24 C0 10.5 10.5 0 24 0 C32 0 39.5 4 44 10.5 C46.5 14 53.5 14 56 10.5 C60.5 4 68 0 76 0 C89.5 0 100 10.5 100 24 C100 41.5 84 57 56.5 83.5 L50 90 Z" fill="#F07C3D"/>
+  
+  <!-- Dog ear left -->
+  <path d="M25 40 L35 25 L45 35" fill="none" stroke="#FFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Cat ear right -->
+  <path d="M75 40 L65 25 L55 35" fill="none" stroke="#FFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Dog face left -->
+  <circle cx="35" cy="45" r="4" fill="#FFF"/>
+  <!-- Cat face right -->
+  <circle cx="65" cy="45" r="4" fill="#FFF"/>
+  
+  <!-- Nose/moustaches dog -->
+  <circle cx="45" cy="55" r="2.5" fill="#FFF"/>
+  <!-- Nose/moustaches cat -->
+  <circle cx="55" cy="55" r="2.5" fill="#FFF"/>
+  
+  <!-- Smile -->
+  <path d="M45 65 Q50 72 55 65" fill="none" stroke="#FFF" stroke-width="3" stroke-linecap="round"/>
+</svg>
