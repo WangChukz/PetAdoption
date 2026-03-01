@@ -24,10 +24,6 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: '/api/:path*',
-        destination: 'https://backend-production-e2b4.up.railway.app/api/:path*' 
-      },
-      {
         source: '/sanctum/csrf-cookie',
         destination: 'https://backend-production-e2b4.up.railway.app/sanctum/csrf-cookie'
       }
