@@ -11,6 +11,8 @@ use App\Models\VolunteerApplication;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class VolunteerController extends Controller
@@ -54,51 +56,69 @@ class VolunteerController extends Controller
         $oldStatus = $volunteer->status;
         $newStatus = $validated['status'];
 
-        $updates = [
-            'status'      => $newStatus,
-            'admin_notes' => $validated['admin_notes'] ?? $volunteer->admin_notes,
-            'reviewed_by' => $request->user()->id,
-            'reviewed_at' => now(),
-        ];
+        return DB::transaction(function () use ($request, $volunteer, $validated, $oldStatus, $newStatus) {
+            $updates = [
+                'status'      => $newStatus,
+                'admin_notes' => $validated['admin_notes'] ?? $volunteer->admin_notes,
+                'reviewed_by' => $request->user()->id,
+                'reviewed_at' => now(),
+            ];
 
-        // Generate interview token when CV is passed
-        if ($newStatus === 'cv_passed' && $oldStatus !== 'cv_passed') {
-            $token = $volunteer->generateInterviewToken();
-            // interview_scheduled_at is human-readable string in email
-        }
+            // Hotfix for MySQL Enum Truncation (if migration failed to run on Railway)
+            try {
+                // Check if we need to expand the column type
+                DB::statement("ALTER TABLE volunteer_applications MODIFY COLUMN status VARCHAR(255) DEFAULT 'pending'");
+            } catch (\Exception $e) {
+                // Ignore if already string or if no permission, but logging it is good
+                Log::warning("Hotfix Alter Table failed: " . $e->getMessage());
+            }
 
-        if ($newStatus === 'interview_scheduled') {
-            $updates['interview_scheduled_at'] = now();
-        }
+            // Generate interview token when CV is passed
+            if ($newStatus === 'cv_passed' && $oldStatus !== 'cv_passed') {
+                $volunteer->generateInterviewToken();
+            }
 
-        $volunteer->update($updates);
-        $volunteer->refresh();
+            if ($newStatus === 'interview_scheduled') {
+                $updates['interview_scheduled_at'] = now();
+            }
 
-        // ── Email dispatch based on status transition ──
-        $interviewDate = $validated['interview_date'] ?? 'sẽ được thông báo sau';
+            $volunteer->update($updates);
+            $volunteer->refresh();
 
-        match ($newStatus) {
-            'cv_passed'          => Mail::to($volunteer->email)->send(new VolunteerCvPassed($volunteer, $interviewDate)),
-            'cv_rejected'        => Mail::to($volunteer->email)->send(new VolunteerCvRejected($volunteer)),
-            'passed'             => Mail::to($volunteer->email)->send(new VolunteerInterviewPassed($volunteer)),
-            'rejected'           => Mail::to($volunteer->email)->send(new VolunteerInterviewRejected($volunteer)),
-            default              => null,
-        };
+            // ── Email dispatch with Resilient Error Handling ──
+            $interviewDate = $validated['interview_date'] ?? 'sẽ được thông báo sau';
+            $mailError = null;
 
-        // Fix 5: Auto soft-delete rejected applications so they disappear from the list
-        if (in_array($newStatus, ['cv_rejected', 'rejected'])) {
-            $volunteer->delete();
+            try {
+                match ($newStatus) {
+                    'cv_passed'          => Mail::to($volunteer->email)->send(new VolunteerCvPassed($volunteer, $interviewDate)),
+                    'cv_rejected'        => Mail::to($volunteer->email)->send(new VolunteerCvRejected($volunteer)),
+                    'passed'             => Mail::to($volunteer->email)->send(new VolunteerInterviewPassed($volunteer)),
+                    'rejected'           => Mail::to($volunteer->email)->send(new VolunteerInterviewRejected($volunteer)),
+                    default              => null,
+                };
+            } catch (\Exception $e) {
+                Log::error("Resilient Mail Failure: " . $e->getMessage());
+                $mailError = "Lưu thành công nhưng không gửi được email (Lỗi SMTP: " . $e->getMessage() . ")";
+            }
+
+            // Fix 5: Auto soft-delete rejected applications
+            if (in_array($newStatus, ['cv_rejected', 'rejected'])) {
+                $volunteer->delete();
+                return response()->json([
+                    'success' => true,
+                    'message' => $mailError ?? 'Đã từ chối và xóa hồ sơ khỏi danh sách.',
+                    'warning' => $mailError ? true : false,
+                ]);
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => 'Đã từ chối và xóa hồ sơ khỏi danh sách.',
+                'message' => $mailError ?? 'Đã cập nhật trạng thái hồ sơ.',
+                'warning' => $mailError ? true : false,
+                'data'    => $volunteer->load('reviewedBy'),
             ]);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Đã cập nhật trạng thái hồ sơ.',
-            'data'    => $volunteer->load('reviewedBy'),
-        ]);
+        });
     }
 
     public function update(Request $request, VolunteerApplication $volunteer): JsonResponse

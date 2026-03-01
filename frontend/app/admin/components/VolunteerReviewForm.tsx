@@ -108,7 +108,11 @@ export default function VolunteerReviewForm({ data }: { data: Application }) {
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || json.error || 'Cập nhật thất bại');
 
-      toast.success(willSendEmail ? '✅ Đã lưu & gửi email tự động!' : '✅ Đã cập nhật trạng thái!');
+      if (json.warning) {
+        toast.error(json.message, { duration: 6000 });
+      } else {
+        toast.success(willSendEmail ? '✅ Đã lưu & gửi email tự động!' : '✅ Đã cập nhật trạng thái!');
+      }
 
       // Rejected apps are soft-deleted → go back to list
       if (newStatus === 'cv_rejected' || newStatus === 'rejected') {
