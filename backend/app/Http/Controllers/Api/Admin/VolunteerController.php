@@ -56,6 +56,15 @@ class VolunteerController extends Controller
         $oldStatus = $volunteer->status;
         $newStatus = $validated['status'];
 
+        // Hotfix for MySQL Enum Truncation (if migration failed to run on Railway)
+        try {
+            // Check if we need to expand the column type
+            DB::statement("ALTER TABLE volunteer_applications MODIFY COLUMN status VARCHAR(255) DEFAULT 'pending'");
+        } catch (\Exception $e) {
+            // Ignore if already string or if no permission, but logging it is good
+            Log::warning("Hotfix Alter Table failed: " . $e->getMessage());
+        }
+
         return DB::transaction(function () use ($request, $volunteer, $validated, $oldStatus, $newStatus) {
             $updates = [
                 'status'      => $newStatus,
@@ -63,15 +72,6 @@ class VolunteerController extends Controller
                 'reviewed_by' => $request->user()->id,
                 'reviewed_at' => now(),
             ];
-
-            // Hotfix for MySQL Enum Truncation (if migration failed to run on Railway)
-            try {
-                // Check if we need to expand the column type
-                DB::statement("ALTER TABLE volunteer_applications MODIFY COLUMN status VARCHAR(255) DEFAULT 'pending'");
-            } catch (\Exception $e) {
-                // Ignore if already string or if no permission, but logging it is good
-                Log::warning("Hotfix Alter Table failed: " . $e->getMessage());
-            }
 
             // Generate interview token when CV is passed
             if ($newStatus === 'cv_passed' && $oldStatus !== 'cv_passed') {
