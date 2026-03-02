@@ -127,12 +127,12 @@ export default async function AdminVolunteersPage({
           <table className="w-full text-left min-w-[1000px]">
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100 font-menu text-[13px] text-gray-500">
-                <th className="font-semibold px-8 py-4 whitespace-nowrap w-[60px]">ID</th>
-                <th className="font-semibold px-6 py-4 whitespace-nowrap">Ứng Viên</th>
-                <th className="font-semibold px-6 py-4 whitespace-nowrap">Vị Trí Ứng Tuyển</th>
-                <th className="font-semibold px-6 py-4 whitespace-nowrap w-44">Ngày Gửi</th>
-                <th className="font-semibold px-6 py-4 whitespace-nowrap w-40">Trạng Thái</th>
-                <th className="font-semibold px-8 py-4 whitespace-nowrap w-44 text-right">Chi Tiết</th>
+                <th className="font-semibold px-8 py-4 whitespace-nowrap w-[60px] text-center">ID</th>
+                <th className="font-semibold px-6 py-4 whitespace-nowrap text-center">Ứng Viên</th>
+                <th className="font-semibold px-6 py-4 whitespace-nowrap text-center">Vị Trí Ứng Tuyển</th>
+                <th className="font-semibold px-6 py-4 whitespace-nowrap w-44 text-center">Ngày Gửi</th>
+                <th className="font-semibold px-6 py-4 whitespace-nowrap w-40 text-center">Trạng Thái</th>
+                <th className="font-semibold px-8 py-4 whitespace-nowrap w-44 text-center">Chi Tiết</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 font-menu text-[14px]">
