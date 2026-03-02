@@ -128,7 +128,7 @@ export default async function AdminVolunteersPage({
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100 font-menu text-[13px] text-gray-500">
                 <th className="font-semibold px-8 py-4 whitespace-nowrap w-[60px] text-center">ID</th>
-                <th className="font-semibold px-6 py-4 whitespace-nowrap text-center">Ứng Viên</th>
+                <th className="font-semibold px-6 py-4 whitespace-nowrap text-left">Ứng Viên</th>
                 <th className="font-semibold px-6 py-4 whitespace-nowrap text-center">Vị Trí Ứng Tuyển</th>
                 <th className="font-semibold px-6 py-4 whitespace-nowrap w-44 text-center">Ngày Gửi</th>
                 <th className="font-semibold px-6 py-4 whitespace-nowrap w-40 text-center">Trạng Thái</th>
