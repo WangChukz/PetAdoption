@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\AdoptionApplication;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Notifications\AdminNotification;
 
 class AdoptionController extends Controller
 {
@@ -29,6 +31,18 @@ class AdoptionController extends Controller
                 'status' => 'pending',
             ]);
             DB::commit();
+
+            // Notify Admins
+            $admins = User::whereIn('role', ['super_admin', 'moderator', 'staff'])->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new AdminNotification(
+                    'Đơn nhận nuôi mới',
+                    "Bạn có đơn nhận nuôi mới (ID: #{$application->id})",
+                    "/admin/adoptions",
+                    'adoption'
+                ));
+            }
+
             return response()->json($application, 201);
         } catch (\Exception $e) {
             DB::rollBack();

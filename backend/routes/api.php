@@ -30,6 +30,11 @@ Route::prefix('admin')
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/stats', [\App\Http\Controllers\Api\Admin\DashboardController::class, '__invoke']);
 
+        // Notifications
+        Route::get('/notifications', [\App\Http\Controllers\Api\Admin\NotificationController::class, 'index']);
+        Route::patch('/notifications/mark-all-read', [\App\Http\Controllers\Api\Admin\NotificationController::class, 'markAllRead']);
+        Route::patch('/notifications/{id}/read', [\App\Http\Controllers\Api\Admin\NotificationController::class, 'markAsRead']);
+
         // Pets CRUD
         Route::apiResource('pets', \App\Http\Controllers\Api\Admin\PetController::class);
         Route::patch('/pets/{pet}/status', [\App\Http\Controllers\Api\Admin\PetController::class, 'updateStatus']);

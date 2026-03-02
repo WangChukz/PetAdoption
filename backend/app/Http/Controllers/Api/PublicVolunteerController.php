@@ -12,6 +12,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use App\Models\User;
+use App\Notifications\AdminNotification;
 
 class PublicVolunteerController extends Controller
 {
@@ -43,6 +45,17 @@ class PublicVolunteerController extends Controller
             'cv_path'  => $cvPath,
             'status'   => 'pending',
         ]);
+
+        // Notify Admins
+        $admins = User::whereIn('role', ['super_admin', 'moderator', 'staff'])->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new AdminNotification(
+                'Ứng viên mới',
+                "Bạn có hồ sơ tình nguyện mới từ {$application->name}",
+                "/admin/volunteers",
+                'volunteer'
+            ));
+        }
 
         return response()->json([
             'success' => true,
