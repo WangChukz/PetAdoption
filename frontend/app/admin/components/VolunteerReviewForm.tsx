@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { CheckCircle2, XCircle, CalendarCheck2, Mic2, PartyPopper, Clock3 } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
 
 type Application = {
   id: number;
@@ -67,6 +68,14 @@ export default function VolunteerReviewForm({ data }: { data: Application }) {
   const [decisionOpen, setDecisionOpen] = useState(false);
   const decisionRef = useRef<HTMLDivElement>(null);
 
+  // Confirm Modal state
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState<{ title: string; message: string; type: 'warning' | 'danger' }>({
+    title: '',
+    message: '',
+    type: 'warning'
+  });
+
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (decisionRef.current && !decisionRef.current.contains(e.target as Node)) {
@@ -88,28 +97,38 @@ export default function VolunteerReviewForm({ data }: { data: Application }) {
     ? `${iTime} – ${new Date(iDate).toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} (${iMode})`
     : '';
 
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleUpdate = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!newStatus) { toast.error('Vui lòng chọn trạng thái mới.'); return; }
     if (needsDate && !iDate) { toast.error('Vui lòng chọn ngày phỏng vấn.'); return; }
 
-    // --- Confirmation Logic ---
-    const selectedOption = allowedOptions.find(o => o.value === newStatus);
-    const labelText = selectedOption ? (selectedOption.label as any)?.props?.children?.[1] || 'Trạng thái này' : 'Trạng thái này';
+    // --- Confirmation Modal Trigger ---
+    if (!showConfirm) {
+        const selectedOption = allowedOptions.find(o => o.value === newStatus);
+        const labelText = selectedOption ? (selectedOption.label as any)?.props?.children?.[1] || 'Trạng thái này' : 'Trạng thái này';
 
-    let warningMessage = '';
-    if (newStatus === 'cv_rejected' || newStatus === 'rejected') {
-        warningMessage = `⚠️ Chú ý: Quyết định "${labelText}" sẽ khiến hồ sơ bị xóa khỏi danh sách quản lý chính. Bạn có chắc chắn muốn tiếp tục?`;
-    } else if (newStatus === 'cv_passed' || newStatus === 'passed') {
-        warningMessage = `⚠️ Chú ý: Bạn đã chọn "${labelText}". Hệ thống sẽ tự động gửi email thông báo cho ứng viên. Bạn có chắc chắn muốn tiếp tục?`;
+        if (newStatus === 'cv_rejected' || newStatus === 'rejected') {
+            setConfirmConfig({
+                title: 'Xác nhận từ chối hồ sơ?',
+                message: `Quyết định "${labelText}" sẽ khiến hồ sơ bị xóa khỏi danh sách quản lý chính. Bạn có chắc chắn muốn tiếp tục?`,
+                type: 'danger'
+            });
+            setShowConfirm(true);
+            return;
+        } else if (newStatus === 'cv_passed' || newStatus === 'passed') {
+            setConfirmConfig({
+                title: 'Xác nhận thông báo cho ứng viên?',
+                message: `Bạn đã chọn "${labelText}". Hệ thống sẽ tự động gửi email thông báo cho ứng viên. Bạn có chắc chắn muốn tiếp tục?`,
+                type: 'warning'
+            });
+            setShowConfirm(true);
+            return;
+        }
     }
-
-    if (warningMessage && !window.confirm(warningMessage)) {
-        return;
-    }
-    // ---------------------------
+    // ----------------------------------
 
     setLoading(true);
+    setShowConfirm(false);
 
     try {
       const res = await fetch(`/api/admin/volunteers/${data.id}/status`, {
@@ -321,6 +340,18 @@ export default function VolunteerReviewForm({ data }: { data: Application }) {
       >
         {loading ? 'Đang lưu...' : '💾 Lưu Quyết Định'}
       </button>
+
+      <ConfirmModal 
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={() => handleUpdate()}
+        isLoading={loading}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        type={confirmConfig.type}
+        confirmText="Tôi chắc chắn"
+        cancelText="Để mình xem lại"
+      />
     </form>
   );
 }

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import ConfirmModal from './ConfirmModal';
 
 type Application = {
   id: number;
@@ -20,21 +21,35 @@ export default function AdoptionReviewForm({ data }: { data: Application }) {
   const [status, setStatus] = useState(data.status);
   const [adminNotes, setAdminNotes] = useState(data.admin_notes || '');
 
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Confirm Modal state
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState<{ title: string; message: string; type: 'warning' | 'danger' }>({
+    title: '',
+    message: '',
+    type: 'warning'
+  });
 
-    // --- Confirmation Logic ---
-    if (status === 'approved' || status === 'rejected') {
+  const handleUpdate = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    // --- Confirmation Modal Trigger ---
+    if (!showConfirm && (status === 'approved' || status === 'rejected')) {
         const label = status === 'approved' ? 'Đã Phê Duyệt' : 'Từ Chối';
-        const msg = status === 'approved' 
-            ? `⚠️ Chú ý: Bạn đang chuyển đơn sang "${label}". Bạn có chắc chắn muốn tiếp tục?`
-            : `⚠️ Chú ý: Bạn đang chọn "${label}" đơn nhận nuôi này. Bạn có chắc chắn muốn tiếp tục?`;
         
-        if (!window.confirm(msg)) return;
+        setConfirmConfig({
+            title: status === 'approved' ? 'Xác nhận phê duyệt đơn?' : 'Xác nhận từ chối đơn?',
+            message: status === 'approved' 
+                ? `Bạn đang chuyển đơn nhận nuôi này sang trạng thái "Đã Phê Duyệt". Bạn có chắc chắn muốn tiếp tục?`
+                : `Bạn đang chọn "Từ Chối" đơn nhận nuôi này. Bạn có chắc chắn muốn tiếp tục?`,
+            type: status === 'approved' ? 'warning' : 'danger'
+        });
+        setShowConfirm(true);
+        return;
     }
-    // ---------------------------
+    // ----------------------------------
 
     setLoading(true);
+    setShowConfirm(false);
 
     try {
       const res = await fetch(`/api/admin/adoptions/${data.id}`, {
@@ -96,6 +111,18 @@ export default function AdoptionReviewForm({ data }: { data: Application }) {
           {loading ? 'Đang lưu...' : 'Lưu Thay Đổi'}
         </button>
       </div>
+
+      <ConfirmModal 
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={() => handleUpdate()}
+        isLoading={loading}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        type={confirmConfig.type}
+        confirmText="Tôi chắc chắn"
+        cancelText="Để mình xem lại"
+      />
     </form>
   );
 }
