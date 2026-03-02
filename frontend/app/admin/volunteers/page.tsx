@@ -75,7 +75,7 @@ export default async function AdminVolunteersPage({
           <div className="flex items-center gap-3">
             <Link href="/admin/volunteers" className={`px-5 py-2.5 rounded-xl text-[13px] font-menu font-bold transition hover:shadow-sm ${!statusFilter ? 'bg-[#1a1a1a] text-white shadow' : 'bg-gray-100/80 text-gray-500 hover:bg-gray-200/80 hover:text-gray-700'}`}>Tất Cả</Link>
             <Link href="/admin/volunteers?status=pending" className={`px-5 py-2.5 rounded-xl text-[13px] font-menu font-bold transition hover:shadow-sm ${statusFilter === 'pending' ? 'bg-[#1a1a1a] text-white shadow' : 'bg-gray-100/80 text-gray-500 hover:bg-gray-200/80 hover:text-gray-700'}`}>Hồ Sơ Mới</Link>
-            <Link href="/admin/volunteers?status=approved" className={`px-5 py-2.5 rounded-xl text-[13px] font-menu font-bold transition hover:shadow-sm ${statusFilter === 'approved' ? 'bg-[#1a1a1a] text-white shadow' : 'bg-gray-100/80 text-gray-500 hover:bg-gray-200/80 hover:text-gray-700'}`}>Đã Nhận</Link>
+            <Link href="/admin/volunteers?status=passed" className={`px-5 py-2.5 rounded-xl text-[13px] font-menu font-bold transition hover:shadow-sm ${statusFilter === 'passed' ? 'bg-[#1a1a1a] text-white shadow' : 'bg-gray-100/80 text-gray-500 hover:bg-gray-200/80 hover:text-gray-700'}`}>Đã Nhận</Link>
           </div>
         </div>
 

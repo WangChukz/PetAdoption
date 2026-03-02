@@ -29,7 +29,7 @@ class DashboardController extends Controller
             'volunteers' => [
                 'total'    => DB::table('volunteer_applications')->count(),
                 'pending'  => DB::table('volunteer_applications')->where('status', 'pending')->count(),
-                'approved' => DB::table('volunteer_applications')->where('status', 'approved')->count(),
+                'approved' => DB::table('volunteer_applications')->where('status', 'passed')->count(),
             ],
             'donations' => [
                 'total_income'  => DB::table('donations')->where('type', 'income')->sum('amount'),
