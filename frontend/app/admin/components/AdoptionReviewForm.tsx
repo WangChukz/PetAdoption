@@ -22,6 +22,18 @@ export default function AdoptionReviewForm({ data }: { data: Application }) {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // --- Confirmation Logic ---
+    if (status === 'approved' || status === 'rejected') {
+        const label = status === 'approved' ? 'Đã Phê Duyệt' : 'Từ Chối';
+        const msg = status === 'approved' 
+            ? `⚠️ Chú ý: Bạn đang chuyển đơn sang "${label}". Bạn có chắc chắn muốn tiếp tục?`
+            : `⚠️ Chú ý: Bạn đang chọn "${label}" đơn nhận nuôi này. Bạn có chắc chắn muốn tiếp tục?`;
+        
+        if (!window.confirm(msg)) return;
+    }
+    // ---------------------------
+
     setLoading(true);
 
     try {

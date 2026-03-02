@@ -92,6 +92,23 @@ export default function VolunteerReviewForm({ data }: { data: Application }) {
     e.preventDefault();
     if (!newStatus) { toast.error('Vui lòng chọn trạng thái mới.'); return; }
     if (needsDate && !iDate) { toast.error('Vui lòng chọn ngày phỏng vấn.'); return; }
+
+    // --- Confirmation Logic ---
+    const selectedOption = allowedOptions.find(o => o.value === newStatus);
+    const labelText = selectedOption ? (selectedOption.label as any)?.props?.children?.[1] || 'Trạng thái này' : 'Trạng thái này';
+
+    let warningMessage = '';
+    if (newStatus === 'cv_rejected' || newStatus === 'rejected') {
+        warningMessage = `⚠️ Chú ý: Quyết định "${labelText}" sẽ khiến hồ sơ bị xóa khỏi danh sách quản lý chính. Bạn có chắc chắn muốn tiếp tục?`;
+    } else if (newStatus === 'cv_passed' || newStatus === 'passed') {
+        warningMessage = `⚠️ Chú ý: Bạn đã chọn "${labelText}". Hệ thống sẽ tự động gửi email thông báo cho ứng viên. Bạn có chắc chắn muốn tiếp tục?`;
+    }
+
+    if (warningMessage && !window.confirm(warningMessage)) {
+        return;
+    }
+    // ---------------------------
+
     setLoading(true);
 
     try {
