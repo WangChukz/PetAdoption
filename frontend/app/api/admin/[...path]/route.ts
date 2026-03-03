@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://127.0.0.1:8000/api';
 
 async function handleProxy(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;
@@ -22,27 +22,26 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  // Clone request body if present
-  let body = null;
+  // Use streaming for non-GET/HEAD requests
+  let body: any = undefined;
   if (req.method !== 'GET' && req.method !== 'HEAD') {
-    // Check if it's multipart/form-data for file uploads
-    const contentType = req.headers.get('content-type') || '';
-    if (contentType.includes('multipart/form-data')) {
-      body = await req.formData();
-      // Remove content-type so fetch automatically calculates boundaries
-      headers.delete('content-type'); 
-    } else {
-      body = await req.text();
-    }
+    body = req.body;
+    // When streaming, keep the original content-type which has the boundary
+    // But remove content-length to let fetch/undici recalculate it
+    headers.delete('content-length');
   }
 
   try {
+    console.log(`[PROXY] ${req.method} ${url}`);
     const res = await fetch(url, {
       method: req.method,
       headers,
       body,
+      // @ts-ignore - duplex is needed for streaming bodies in Node.js
+      duplex: 'half',
     });
 
+    console.log(`[PROXY] Response: ${res.status}`);
     const isJson = res.headers.get('content-type')?.includes('application/json');
     const data = isJson ? await res.json() : await res.text();
 
@@ -53,6 +52,7 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
       }
     });
   } catch (error: any) {
+    console.error(`[PROXY] Error:`, error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -93,7 +93,7 @@ export default async function AdminAdoptionsPage({
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center flex-shrink-0">
                           {req.pet?.image_url ? (
-                             <img src={`http://localhost:8000/storage/${req.pet.image_url}`} alt={req.pet.name} className="w-full h-full object-cover" />
+                             <img src={`http://127.0.0.1:8000/storage/${req.pet.image_url}`} alt={req.pet.name} className="w-full h-full object-cover" />
                           ) : '🐾'}
                         </div>
                         <div>

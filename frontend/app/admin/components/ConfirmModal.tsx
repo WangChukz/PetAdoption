@@ -55,23 +55,21 @@ export default function ConfirmModal({
       icon: <AlertCircle className="w-6 h-6 text-orange-500" />,
       bg: 'bg-orange-50',
       border: 'border-orange-100',
-      button: 'bg-[#f08c50] hover:bg-[#d16830]',
+      button: 'bg-orange-500 hover:bg-orange-600 shadow-orange-200',
     },
     danger: {
       icon: <Trash2 className="w-6 h-6 text-red-500" />,
       bg: 'bg-red-50',
       border: 'border-red-100',
-      button: 'bg-red-600 hover:bg-red-700',
+      button: 'bg-red-500 hover:bg-red-600 shadow-red-200',
     },
     info: {
       icon: <AlertCircle className="w-6 h-6 text-blue-500" />,
       bg: 'bg-blue-50',
       border: 'border-blue-100',
-      button: 'bg-blue-600 hover:bg-blue-700',
+      button: 'bg-[#3A8D9D] hover:bg-[#2d6f7c] shadow-blue-200',
     },
   };
-
-  const config = typeConfig[type];
 
   const modalContent = (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
@@ -81,50 +79,43 @@ export default function ConfirmModal({
         onClick={onClose}
       />
       
-      {/* Modal Content */}
-      <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className={`w-12 h-12 ${config.bg} ${config.border} border rounded-2xl flex items-center justify-center`}>
-              {config.icon}
-            </div>
-            <button 
-              onClick={onClose}
-              className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
+      {/* Modal Content - Sharp Minimalist Centered */}
+      <div className="relative w-full max-w-[400px] bg-white rounded-[10px] shadow-[0_10px_30px_-5px_rgba(0,0,0,0.1)] overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-gray-100 mx-4">
+        <div className="p-6 md:p-8 flex flex-col items-center">
+          {/* Header */}
+          <div className="mb-2 md:mb-3 text-center">
+            <h3 className="text-[17px] md:text-[18px] font-semibold font-menu text-[#1a1a1a] leading-tight tracking-tight">
+              {title}
+            </h3>
           </div>
           
-          <h3 className="text-[18px] font-black font-menu text-[#1a1a1a] mb-2 leading-tight">
-            {title}
-          </h3>
-          
-          <p className="text-[14px] text-gray-500 font-menu leading-relaxed">
-            {message}
-          </p>
-        </div>
-        
-        <div className="px-6 py-4 bg-gray-50 flex gap-3">
-          <button
-            onClick={onClose}
-            disabled={isLoading}
-            className="flex-1 px-4 py-2.5 rounded-xl font-menu font-bold text-[13px] text-gray-600 bg-white border border-gray-200 hover:bg-gray-100 transition disabled:opacity-50"
-          >
-            {cancelText}
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={isLoading}
-            className={`flex-1 px-4 py-2.5 rounded-xl font-menu font-bold text-[13px] text-white transition shadow-md disabled:opacity-70 ${config.button}`}
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Đang xử lý...
-              </div>
-            ) : confirmText}
-          </button>
+          <div className="mb-6 md:mb-8 text-center">
+            <p className="text-[13.5px] md:text-[14px] text-gray-500 font-menu leading-relaxed font-normal">
+              {message}
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2.5 md:gap-3 w-full justify-center">
+            <button
+              onClick={onConfirm}
+              disabled={isLoading}
+              className="px-6 py-2.5 rounded-[8px] font-menu font-medium text-[13px] md:text-[13.5px] text-white bg-[#f08c50] hover:bg-[#e07b40] transition-all active:scale-95 disabled:opacity-50 shadow-sm whitespace-nowrap min-w-[120px]"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Đang xử lý</span>
+                </div>
+              ) : confirmText}
+            </button>
+            <button
+              onClick={onClose}
+              disabled={isLoading}
+              className="px-6 py-2.5 rounded-[8px] font-menu font-medium text-[13px] md:text-[13.5px] text-gray-500 bg-gray-50 hover:bg-gray-100 transition-all active:scale-95 disabled:opacity-50 border border-gray-100 whitespace-nowrap min-w-[120px]"
+            >
+              {cancelText}
+            </button>
+          </div>
         </div>
       </div>
     </div>

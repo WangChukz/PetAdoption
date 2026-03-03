@@ -54,7 +54,7 @@ export default function AdminBottomNav() {
                 href={item.href}
                 onClick={() => setShowMore(false)}
                 className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl font-menu text-[14px] font-semibold transition-colors
-                  ${isActive(item.href) ? 'bg-orange-50 text-[#f08c50]' : 'text-gray-600 hover:bg-gray-50'}`}
+                  ${isActive(item.href) ? 'bg-[#3A8D9D]/10 text-[#3A8D9D]' : 'text-gray-600 hover:bg-gray-50'}`}
               >
                 <Icon className="w-5 h-5" strokeWidth={2.5} />
                 {item.label}
@@ -85,9 +85,9 @@ export default function AdminBottomNav() {
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors
-                ${active ? 'text-[#f08c50]' : 'text-gray-400 hover:text-gray-600'}`}
+                ${active ? 'text-[#3A8D9D]' : 'text-gray-400 hover:text-gray-600'}`}
             >
-              <div className={`relative flex items-center justify-center w-8 h-8 rounded-full ${active ? 'bg-orange-50' : ''}`}>
+              <div className={`relative flex items-center justify-center w-9 h-9 rounded-2xl transition-all ${active ? 'bg-[#3A8D9D] text-white shadow-lg shadow-teal-500/20 scale-110' : ''}`}>
                 <Icon className="w-5 h-5" strokeWidth={active ? 2.5 : 2} />
               </div>
               <span className={`font-menu text-[10px] ${active ? 'font-bold' : 'font-medium'}`}>
@@ -101,9 +101,9 @@ export default function AdminBottomNav() {
         <button
           onClick={() => setShowMore(!showMore)}
           className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors
-            ${showMore ? 'text-[#f08c50]' : 'text-gray-400 hover:text-gray-600'}`}
+            ${showMore ? 'text-[#3A8D9D]' : 'text-gray-400 hover:text-gray-600'}`}
         >
-          <div className={`relative flex items-center justify-center w-8 h-8 rounded-full ${showMore ? 'bg-orange-50' : ''}`}>
+          <div className={`relative flex items-center justify-center w-9 h-9 rounded-2xl transition-all ${showMore ? 'bg-[#3A8D9D] text-white shadow-lg shadow-teal-500/20 scale-110' : ''}`}>
             <Menu className="w-5 h-5" strokeWidth={showMore ? 2.5 : 2} />
           </div>
           <span className={`font-menu text-[10px] ${showMore ? 'font-bold' : 'font-medium'}`}>

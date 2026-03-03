@@ -13,11 +13,31 @@ class DashboardController extends Controller
 {
     public function __invoke(): JsonResponse
     {
+        $now = now();
+        $sevenDaysAgo = now()->subDays(7);
+        $fourteenDaysAgo = now()->subDays(14);
+
+        // Pet Trends
+        $petTotal = Pet::count();
+        $petLastWeek = Pet::where('created_at', '<=', $sevenDaysAgo)->count();
+        $petTrend = $petTotal - $petLastWeek;
+
+        // Adopted Trends (assuming 'adopted' status change is tracked by updated_at or similar, 
+        // but for now let's use created_at of pets with 'adopted' status as a proxy or 
+        // better: count how many became 'adopted' in the last 7 days)
+        $adoptedTotal = Pet::where('status', 'adopted')->count();
+        $adoptedLastWeek = Pet::where('status', 'adopted')
+            ->where('updated_at', '<=', $sevenDaysAgo)
+            ->count();
+        $adoptedTrend = $adoptedTotal - $adoptedLastWeek;
+
         $stats = [
             'pets' => [
-                'total'        => Pet::count(),
+                'total'        => $petTotal,
+                'trend'        => $petTrend,
                 'available'    => Pet::where('status', 'available')->count(),
-                'adopted'      => Pet::where('status', 'adopted')->count(),
+                'adopted'      => $adoptedTotal,
+                'adoptedTrend' => $adoptedTrend,
                 'in_treatment' => Pet::where('status', 'in_treatment')->count(),
             ],
             'adoptions' => [

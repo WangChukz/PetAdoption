@@ -38,7 +38,7 @@ export default function PostForm({ initialData, isEdit }: Props) {
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
-    initialData?.image_url ? `http://localhost:8000/storage/${initialData.image_url}` : null
+    initialData?.image_url ? `http://127.0.0.1:8000/storage/${initialData.image_url}` : null
   );
 
   const [formData, setFormData] = useState<Post>({

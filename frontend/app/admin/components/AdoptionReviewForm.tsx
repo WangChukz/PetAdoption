@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from './ConfirmModal';
 
@@ -86,13 +87,16 @@ export default function AdoptionReviewForm({ data }: { data: Application }) {
           <label className="block font-menu text-[13px] font-semibold text-gray-700 mb-1">
             Trạng Thái Đơn Nhận Nuôi <span className="text-red-500">*</span>
           </label>
-          <select value={status} onChange={(e: any) => setStatus(e.target.value)}
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-[14px] font-menu focus:ring-2 focus:ring-[#f08c50]/20 focus:border-[#f08c50] focus:bg-white transition">
-            <option value="pending">Chờ Duyệt Mới</option>
-            <option value="interviewing">Đang Phỏng Vấn</option>
-            <option value="approved">Đã Phê Duyệt</option>
-            <option value="rejected">Từ Chối</option>
-          </select>
+          <div className="relative">
+            <select value={status} onChange={(e: any) => setStatus(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 pr-10 py-2.5 text-[14px] font-menu focus:ring-2 focus:ring-[#f08c50]/20 focus:border-[#f08c50] focus:bg-white transition appearance-none cursor-pointer">
+              <option value="pending">Chờ Duyệt Mới</option>
+              <option value="interviewing">Đang Phỏng Vấn</option>
+              <option value="approved">Đã Phê Duyệt</option>
+              <option value="rejected">Từ Chối</option>
+            </select>
+            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          </div>
         </div>
       </div>
 

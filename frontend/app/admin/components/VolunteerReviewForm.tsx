@@ -3,7 +3,7 @@
 import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { CheckCircle2, XCircle, CalendarCheck2, Mic2, PartyPopper, Clock3 } from 'lucide-react';
+import { CheckCircle2, XCircle, CalendarCheck2, Mic2, PartyPopper, Clock3, ChevronDown } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 
 type Application = {
@@ -275,29 +275,31 @@ export default function VolunteerReviewForm({ data }: { data: Application }) {
 
           <div>
             <label className="block font-menu text-[12px] font-semibold text-gray-600 mb-1">Giờ bắt đầu</label>
-            <div className="rounded-lg overflow-hidden">
+            <div className="relative">
               <select
                 value={iTime}
                 onChange={e => setITime(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[14px] font-menu focus:ring-2 focus:ring-[#f08c50]/20 focus:border-[#f08c50] transition"
+                className="w-full bg-white border border-gray-200 rounded-lg px-3 pr-8 py-2 text-[14px] font-menu focus:ring-2 focus:ring-[#f08c50]/20 focus:border-[#f08c50] transition appearance-none cursor-pointer"
               >
                 {TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
             </div>
           </div>
 
           <div>
             <label className="block font-menu text-[12px] font-semibold text-gray-600 mb-1">Hình thức</label>
-            <div className="rounded-lg overflow-hidden">
+            <div className="relative">
               <select
                 value={iMode}
                 onChange={e => setIMode(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[14px] font-menu focus:ring-2 focus:ring-[#f08c50]/20 focus:border-[#f08c50] transition"
+                className="w-full bg-white border border-gray-200 rounded-lg px-3 pr-8 py-2 text-[14px] font-menu focus:ring-2 focus:ring-[#f08c50]/20 focus:border-[#f08c50] transition appearance-none cursor-pointer"
               >
                 <option>Online (Google Meet)</option>
                 <option>Trực tiếp tại văn phòng</option>
                 <option>Online (Zoom)</option>
               </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
             </div>
           </div>
 

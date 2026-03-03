@@ -1,6 +1,4 @@
-import { cookies } from 'next/headers';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://127.0.0.1:8000/api';
 
 // Custom Error Class as defined in error-handling-patterns skill
 export class AuthError extends Error {
@@ -13,29 +11,52 @@ export class AuthError extends Error {
 }
 
 /**
- * Robust fetch API wrapper designed for Server Components.
- * Automatically handles admin_token injection and standardizes Error extraction.
+ * Robust fetch API wrapper designed to work in both Server and Client Components.
+ * Server side: Injects admin_token from Next.js cookies and calls backend directly.
+ * Client side: Routes through the Next.js API proxy (/api/admin).
  */
 export async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<any> {
-  const url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
-  
-  // Inject authorization token from Next.js cookies (Server Side)
-  const cookieStore = await cookies();
-  const token = cookieStore.get('admin_token')?.value;
-
+  const isServer = typeof window === 'undefined';
+  let url: string;
   const headers = new Headers(options.headers);
+
+  if (isServer) {
+    // Server Side Logic: Requires next/headers
+    try {
+      // Dynamic import to avoid client-side bundling issues
+      const { cookies } = await import('next/headers');
+      const cookieStore = await cookies();
+      const token = cookieStore.get('admin_token')?.value;
+      
+      url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+      }
+    } catch (error) {
+       console.error('[fetchAPI] Failed to get cookies on server side', error);
+       url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    }
+  } else {
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    
+    // Improved logic to avoid double prefixing
+    if (cleanEndpoint.startsWith('/api/admin')) {
+      url = cleanEndpoint;
+    } else if (cleanEndpoint.startsWith('/admin')) {
+      url = `/api${cleanEndpoint}`;
+    } else {
+      url = `/api/admin${cleanEndpoint}`;
+    }
+  }
+
   headers.set('Accept', 'application/json');
   if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
   }
-  
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
 
   const res = await fetch(url, { ...options, headers });
 
-  // Handle 401 Unauthorized / 403 Forbidden specifically (Graceful Degradation Triggers)
+  // Handle 401 Unauthorized / 403 Forbidden specifically
   if (res.status === 401 || res.status === 403) {
     throw new AuthError('Bạn cần đăng nhập để xem nội dung này', res.status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN', res.status);
   }

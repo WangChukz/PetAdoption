@@ -25,5 +25,7 @@ class AppServiceProvider extends ServiceProvider
         Mail::extend('brevo', function (array $config) {
             return new BrevoApiTransport($config['key'], HttpClient::create());
         });
+
+        \App\Models\CareLog::observe(\App\Observers\CareLogObserver::class);
     }
 }

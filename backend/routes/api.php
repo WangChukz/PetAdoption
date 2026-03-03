@@ -21,6 +21,9 @@ Route::get('/pets', [PetController::class, 'index']);
 Route::post('/adoptions', [AdoptionController::class, 'store']);
 Route::get('/adoptions/{id}', [AdoptionController::class, 'show']);
 
+// ─── External Website Integration ───────────────────────────
+Route::get('/external/available-pets', [\App\Http\Controllers\Api\ExternalPetApiController::class, 'getAvailablePets']);
+
 // ─── Admin API (Sanctum + Role) ─────────────────────────────
 Route::prefix('admin')
     ->middleware(['auth:sanctum', 'role:super_admin,moderator,staff'])
@@ -36,8 +39,14 @@ Route::prefix('admin')
         Route::patch('/notifications/{id}/read', [\App\Http\Controllers\Api\Admin\NotificationController::class, 'markAsRead']);
 
         // Pets CRUD
+        Route::get('/pets/metadata', [\App\Http\Controllers\Api\Admin\PetController::class, 'metadata']);
         Route::apiResource('pets', \App\Http\Controllers\Api\Admin\PetController::class);
         Route::patch('/pets/{pet}/status', [\App\Http\Controllers\Api\Admin\PetController::class, 'updateStatus']);
+        Route::post('/pets/{pet}/logs', [\App\Http\Controllers\Api\Admin\PetController::class, 'addLog']);
+        Route::post('/pets/{pet}/gallery', [\App\Http\Controllers\Api\Admin\PetController::class, 'uploadGalleryImage']);
+        Route::delete('/pets/gallery/{image}', [\App\Http\Controllers\Api\Admin\PetController::class, 'deleteGalleryImage']);
+        Route::patch('/pets/tasks/{task_id}', [\App\Http\Controllers\Api\Admin\PetController::class, 'updateTask']);
+        Route::post('/pets/{uuid}/force-treatment', [\App\Http\Controllers\Api\ExternalPetApiController::class, 'forceTreatment']);
 
         // Adoption Applications
         Route::apiResource('adoptions', \App\Http\Controllers\Api\Admin\AdoptionController::class);

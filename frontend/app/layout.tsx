@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Montserrat, Poppins, Be_Vietnam_Pro } from 'next/font/google'
+import { Montserrat, Poppins, Be_Vietnam_Pro, Inter, Manrope } from 'next/font/google'
 import './globals.css'
 
 const montserrat = Montserrat({
@@ -17,6 +17,16 @@ const poppins = Poppins({
 const beVietnamPro = Be_Vietnam_Pro({
   variable: '--font-be-vietnam-pro',
   weight: ['400', '500', '600', '700', '800', '900'],
+  subsets: ['latin', 'vietnamese'],
+})
+
+const inter = Inter({
+  variable: '--font-inter',
+  subsets: ['latin'],
+})
+
+const manrope = Manrope({
+  variable: '--font-manrope',
   subsets: ['latin'],
 })
 
@@ -32,7 +42,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${montserrat.variable} ${poppins.variable} ${beVietnamPro.variable} antialiased bg-background font-body`}>
+      <body className={`${montserrat.variable} ${poppins.variable} ${beVietnamPro.variable} ${inter.variable} ${manrope.variable} antialiased bg-background font-body`}>
         {children}
       </body>
     </html>

@@ -3,13 +3,30 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState } from 'react';
+import Tooltip from './Tooltip';
 
-import { LayoutDashboard, Dog, ClipboardList, Users, HandHeart, FileText, User, LogOut, PawPrint } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  Dog, 
+  ClipboardList, 
+  Users, 
+  HandHeart, 
+  FileText, 
+  User, 
+  Home, 
+  PawPrint,
+  ChevronLeft,
+  ChevronRight,
+  LogOut
+} from 'lucide-react';
 
-const navItems = [
+const totalOverview = [
   { href: '/admin',           label: 'Dashboard',       icon: <LayoutDashboard strokeWidth={2.5} className="w-4 h-4" /> },
   { href: '/admin/pets',      label: 'Thú Cưng',        icon: <Dog strokeWidth={2.5} className="w-4 h-4" /> },
   { href: '/admin/adoptions', label: 'Đơn Nhận Nuôi',   icon: <ClipboardList strokeWidth={2.5} className="w-4 h-4" /> },
+];
+
+const managementItems = [
   { href: '/admin/volunteers',label: 'Tình Nguyện Viên', icon: <Users strokeWidth={2.5} className="w-4 h-4" /> },
   { href: '/admin/donations', label: 'Quyên Góp',        icon: <HandHeart strokeWidth={2.5} className="w-4 h-4" /> },
   { href: '/admin/posts',     label: 'Bài Viết',         icon: <FileText strokeWidth={2.5} className="w-4 h-4" /> },
@@ -23,62 +40,110 @@ export default function AdminSidebar() {
   const isActive = (href: string) =>
     href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
 
+  const NavItem = ({ item, collapsed }: { item: any, collapsed: boolean }) => {
+    const active = isActive(item.href);
+    
+    const content = (
+      <Link
+        href={item.href}
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-[10px] font-menu text-[13.5px] font-semibold transition-all duration-300 group relative w-full
+          ${active
+            ? 'bg-white/15 text-white shadow-sm'
+            : 'text-white/70 hover:bg-white/5 hover:text-white'}`}
+      >
+        <div className={`flex items-center justify-center w-5 transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>
+          {React.cloneElement(item.icon, {
+            className: `${item.icon.props.className} transition-colors duration-300 ${active ? 'text-[#f08c50]' : ''}`,
+          })}
+        </div>
+        {!collapsed && <span className="truncate whitespace-nowrap">{item.label}</span>}
+      </Link>
+    );
+
+    if (collapsed) {
+      return (
+        <Tooltip content={item.label} position="right">
+          {content}
+        </Tooltip>
+      );
+    }
+
+    return content;
+  };
+
   return (
     <aside
-      className={`flex flex-col h-full bg-white border-r border-gray-100 shadow-sm transition-all duration-300 ${collapsed ? 'w-[68px]' : 'w-[240px]'}`}
+      className={`relative flex flex-col h-full bg-[#3A8D9D] border-r border-[#ffffff]/10 shadow-2xl transition-all duration-500 ease-in-out ${collapsed ? 'w-[70px]' : 'w-[260px]'} z-40`}
     >
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-gray-100">
-        <div className="w-9 h-9 bg-[#f08c50] rounded-xl flex items-center justify-center text-white flex-shrink-0">
-          <PawPrint className="w-5 h-5 fill-current" />
+      {/* Toggle Button */}
+      <button 
+        onClick={() => setCollapsed(!collapsed)}
+        className="absolute -right-3 top-20 w-6 h-6 bg-[#f08c50] rounded-full flex items-center justify-center text-white shadow-[0_2px_8px_rgba(0,0,0,0.2)] hover:bg-[#d16830] transition-all z-50 hover:scale-110 active:scale-95 border-2 border-white"
+        title={collapsed ? "Mở rộng" : "Thu gọn"}
+      >
+        {collapsed ? <ChevronRight size={12} strokeWidth={4} /> : <ChevronLeft size={12} strokeWidth={4} />}
+      </button>
+
+      {/* Logo Section */}
+      <div className={`flex items-center gap-3 px-4 py-6 overflow-hidden ${collapsed ? 'justify-center' : ''}`}>
+        <div className="w-10 h-10 bg-white rounded-[12px] flex items-center justify-center text-[#3A8D9D] flex-shrink-0 shadow-lg border border-white/10 group-hover:rotate-6 transition-transform">
+          <PawPrint className="w-6 h-6 fill-current" />
         </div>
         {!collapsed && (
-          <div className="flex flex-col leading-none">
-            <span className="font-black text-[14px] text-[#1a1a1a]">PetAdoption</span>
-            <span className="text-[11px] text-[#f08c50] font-semibold">Admin Panel</span>
+          <div className="flex flex-col leading-tight animate-in fade-in slide-in-from-left-4 duration-500">
+            <span className="font-black text-[17px] text-white tracking-tight">PetAdoption</span>
+            <span className="text-[10px] text-white/60 font-medium uppercase tracking-[0.15em]">Admin Panel</span>
           </div>
         )}
-        <button
-          onClick={() => setCollapsed(c => !c)}
-          className={`ml-auto text-gray-400 hover:text-gray-700 transition ${collapsed ? 'rotate-180' : ''}`}
-          title="Thu gọn sidebar"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
-        {navItems.map(item => (
-          <Link
-            key={item.href}
-            href={item.href}
-            title={collapsed ? item.label : undefined}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-menu text-[13.5px] font-medium transition-all duration-150 group
-              ${isActive(item.href)
-                ? 'bg-[#f08c50] text-white shadow-sm'
-                : 'text-gray-500 hover:bg-orange-50 hover:text-[#f08c50]'}`}
-          >
-            <span className="flex items-center justify-center w-[18px] flex-shrink-0">{item.icon}</span>
-            {!collapsed && <span>{item.label}</span>}
-            {!collapsed && isActive(item.href) && (
-              <span className="ml-auto w-1.5 h-1.5 bg-white rounded-full" />
-            )}
-          </Link>
-        ))}
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-2 flex flex-col gap-1 overflow-y-auto no-scrollbar">
+        {/* TỔNG QUAN Section */}
+        {!collapsed && (
+          <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-2 px-3 mt-4 animate-in fade-in duration-700">
+            Tổng quan
+          </p>
+        )}
+        <div className="flex flex-col gap-1">
+          {totalOverview.map((item) => (
+            <NavItem key={item.href} item={item} collapsed={collapsed} />
+          ))}
+        </div>
+
+        {/* QUẢN LÝ Section */}
+        {!collapsed && (
+          <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-2 px-3 mt-6 animate-in fade-in duration-700">
+            Quản lý
+          </p>
+        )}
+        <div className="flex flex-col gap-1">
+          {managementItems.map((item) => (
+            <NavItem key={item.href} item={item} collapsed={collapsed} />
+          ))}
+        </div>
       </nav>
 
-      {/* Bottom */}
-      <div className="px-3 py-4 border-t border-gray-100">
-        <Link
-          href="/"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-menu text-[13px] text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
-        >
-          <span className="flex flex-shrink-0 items-center justify-center"><LogOut className="w-4 h-4" strokeWidth={2.5} /></span>
-          {!collapsed && <span>Về trang web</span>}
-        </Link>
+      {/* Bottom Link Section */}
+      <div className={`px-3 mb-6 flex flex-col gap-2 ${collapsed ? 'items-center' : ''}`}>
+        {collapsed ? (
+          <Tooltip content="Quay về trang web" position="right">
+            <Link
+              href="/"
+              className="w-10 h-10 flex items-center justify-center rounded-[10px] bg-white/10 hover:bg-white/20 text-white transition-all border border-white/10 shadow-md group"
+            >
+              <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </Link>
+          </Tooltip>
+        ) : (
+          <Link
+            href="/"
+            className="flex items-center justify-center gap-3 py-3 rounded-[12px] bg-white/10 hover:bg-white/20 text-white font-bold text-[13px] transition-all border border-white/10 group shadow-md animate-in slide-in-from-bottom-4 duration-500"
+          >
+            <Home className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            <span>Quay về trang web</span>
+          </Link>
+        )}
       </div>
     </aside>
   );
