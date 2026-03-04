@@ -53,6 +53,7 @@ Route::prefix('admin')
         Route::patch('/adoptions/{adoption}/status', [\App\Http\Controllers\Api\Admin\AdoptionController::class, 'updateStatus']);
 
         // Volunteer Applications
+        Route::get('/volunteers/stats', [\App\Http\Controllers\Api\Admin\VolunteerController::class, 'stats']);
         Route::apiResource('volunteers', \App\Http\Controllers\Api\Admin\VolunteerController::class);
         Route::patch('/volunteers/{volunteer}/status', [\App\Http\Controllers\Api\Admin\VolunteerController::class, 'updateStatus']);
 

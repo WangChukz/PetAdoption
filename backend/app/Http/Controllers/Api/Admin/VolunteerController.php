@@ -24,10 +24,18 @@ class VolunteerController extends Controller
         if ($request->filled('status')) {
             $query->where('status', $request->get('status'));
         }
-        if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%');
+
+        if ($request->filled('position')) {
+            $query->where('position', $request->get('position'));
+        }
+
+        $search = $request->get('q') ?? $request->get('search');
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%')
+                  ->orWhere('id', 'like', '%' . $search . '%')
+                  ->orWhere('phone', 'like', '%' . $search . '%');
             });
         }
 
@@ -177,5 +185,47 @@ class VolunteerController extends Controller
             'message' => 'Hồ sơ tình nguyện viên đã được tạo thành công.',
             'data'    => $application,
         ], 201);
+    }
+
+    public function stats(): JsonResponse
+    {
+        $total = VolunteerApplication::count();
+        $pending = VolunteerApplication::where('status', 'pending')->count();
+        $interviewing = VolunteerApplication::whereIn('status', ['interview_scheduled', 'interviewing'])->count();
+        $passed = VolunteerApplication::where('status', 'passed')->count();
+
+        // Calculate trends (simple comparison: this month vs total)
+        $thisMonthCount = VolunteerApplication::where('created_at', '>=', now()->startOfMonth())->count();
+        $trendStr = $total > 0 ? '+' . round(($thisMonthCount / max($total, 1)) * 100) . '% tháng này' : '0%';
+        
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total' => [
+                    'label' => 'TỔNG ỨNG VIÊN',
+                    'value' => number_format($total),
+                    'grow' => $trendStr,
+                    'type' => 'up'
+                ],
+                'pending' => [
+                    'label' => 'ĐANG CHỜ DUYỆT',
+                    'value' => number_format($pending),
+                    'grow' => 'Hồ sơ mới',
+                    'type' => 'up'
+                ],
+                'interviewing' => [
+                    'label' => 'ĐANG PHỎNG VẤN',
+                    'value' => number_format($interviewing),
+                    'grow' => 'Sắp tới',
+                    'type' => 'up'
+                ],
+                'passed' => [
+                    'label' => 'ĐÃ TIẾP NHẬN',
+                    'value' => number_format($passed),
+                    'grow' => 'Hoàn tất',
+                    'type' => 'up'
+                ]
+            ]
+        ]);
     }
 }
