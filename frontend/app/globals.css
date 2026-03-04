@@ -25,6 +25,10 @@
   --font-body: var(--font-be-vietnam-pro), var(--font-inter), sans-serif;
 }
 
+.font-vietnam {
+  font-family: var(--font-be-vietnam-pro), sans-serif;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -54,6 +58,14 @@ body {
 * {
   scrollbar-width: thin;
   scrollbar-color: #e5e7eb transparent;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 /* Premium Admin Toast with Progress Bar */

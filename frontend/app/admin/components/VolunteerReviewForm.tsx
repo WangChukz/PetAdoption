@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { CheckCircle2, XCircle, CalendarCheck2, Mic2, PartyPopper, Clock3, ChevronDown } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
+import ModernDatePicker from '@/app/components/ModernDatePicker';
 
 type Application = {
   id: number;
@@ -216,20 +217,20 @@ export default function VolunteerReviewForm({ data }: { data: Application }) {
           <button
             type="button"
             onClick={() => setDecisionOpen(!decisionOpen)}
-            className={`w-full flex items-center justify-between bg-gray-50 hover:bg-white border rounded-xl px-4 py-2.5 font-menu text-[14px] transition-all outline-none
-              ${decisionOpen ? 'border-[#f08c50] ring-4 ring-[#f08c50]/10 bg-white' : 'border-gray-200 hover:border-gray-300'}
-              ${newStatus ? 'text-gray-800' : 'text-gray-400'}`}
+            className={`w-full flex items-center justify-between bg-gray-50/50 hover:bg-white border rounded-xl px-4 py-3 font-vietnam text-[14px] transition-all outline-none
+              ${decisionOpen ? 'border-blue-200 ring-4 ring-blue-100/20 bg-white' : 'border-gray-100 hover:border-blue-100'}
+              ${newStatus ? 'text-gray-800 font-bold' : 'text-gray-400 font-medium'}`}
           >
             <span className="truncate">
               {newStatus ? allowedOptions.find(o => o.value === newStatus)?.label : '-- Chọn quyết định --'}
             </span>
-            <svg className={`w-3.5 h-3.5 text-gray-400 ml-2 shrink-0 transition-transform duration-200 ${decisionOpen ? '-rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg className={`w-4 h-4 text-gray-400 ml-2 shrink-0 transition-transform duration-300 ${decisionOpen ? '-rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
 
           {decisionOpen && (
-            <div className="absolute z-50 w-full mt-1.5 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-2xl py-2 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
               {allowedOptions.map(opt => (
                 <button
                   type="button"
@@ -238,16 +239,16 @@ export default function VolunteerReviewForm({ data }: { data: Application }) {
                     setNewStatus(opt.value);
                     setDecisionOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-2.5 font-menu text-[13px] transition flex items-center gap-2
+                  className={`w-full text-left px-4 py-3 font-vietnam text-[13px] transition-all flex items-center gap-2
                     ${newStatus === opt.value
-                      ? 'bg-orange-50 text-[#d16830] font-bold'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-[#f08c50] font-medium'}`}
+                      ? 'bg-blue-50 text-blue-600 font-bold'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-blue-500 font-medium'}`}
                 >
                   {newStatus === opt.value ? (
-                    <svg className="w-3.5 h-3.5 text-[#f08c50] shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-blue-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                  ) : <span className="w-3.5 shrink-0" />}
+                  ) : <span className="w-4 shrink-0" />}
                   {opt.label}
                 </button>
               ))}
@@ -262,44 +263,40 @@ export default function VolunteerReviewForm({ data }: { data: Application }) {
           <p className="font-menu text-[13px] font-semibold text-orange-700">📅 Lịch Phỏng Vấn (hiển thị trong email)</p>
 
           <div>
-            <label className="block font-menu text-[12px] font-semibold text-gray-600 mb-1">Ngày phỏng vấn</label>
-            <input
-              type="date"
+            <label className="block font-menu text-[12px] font-semibold text-gray-600 mb-1.5">Ngày phỏng vấn</label>
+            <ModernDatePicker 
               value={iDate}
-              min={new Date().toISOString().split('T')[0]}
-              onChange={e => setIDate(e.target.value)}
-              required
-              className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[14px] font-menu focus:ring-2 focus:ring-[#f08c50]/20 focus:border-[#f08c50] transition"
+              onChange={setIDate}
             />
           </div>
 
           <div>
-            <label className="block font-menu text-[12px] font-semibold text-gray-600 mb-1">Giờ bắt đầu</label>
+            <label className="block font-bold text-gray-400 text-[11px] tracking-widest uppercase ml-1 mb-2">Giờ bắt đầu</label>
             <div className="relative">
               <select
                 value={iTime}
                 onChange={e => setITime(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 pr-8 py-2 text-[14px] font-menu focus:ring-2 focus:ring-[#f08c50]/20 focus:border-[#f08c50] transition appearance-none cursor-pointer"
+                className="w-full bg-white border border-gray-100 rounded-xl px-4 py-2.5 font-vietnam text-[14px] text-gray-700 focus:ring-4 focus:ring-blue-100/20 focus:border-blue-200 transition-all appearance-none cursor-pointer"
               >
                 {TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400 pointer-events-none" />
             </div>
           </div>
 
           <div>
-            <label className="block font-menu text-[12px] font-semibold text-gray-600 mb-1">Hình thức</label>
+            <label className="block font-bold text-gray-400 text-[11px] tracking-widest uppercase ml-1 mb-2">Hình thức</label>
             <div className="relative">
               <select
                 value={iMode}
                 onChange={e => setIMode(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 pr-8 py-2 text-[14px] font-menu focus:ring-2 focus:ring-[#f08c50]/20 focus:border-[#f08c50] transition appearance-none cursor-pointer"
+                className="w-full bg-white border border-gray-100 rounded-xl px-4 py-2.5 font-vietnam text-[14px] text-gray-700 focus:ring-4 focus:ring-blue-100/20 focus:border-blue-200 transition-all appearance-none cursor-pointer"
               >
                 <option>Online (Google Meet)</option>
                 <option>Trực tiếp tại văn phòng</option>
                 <option>Online (Zoom)</option>
               </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400 pointer-events-none" />
             </div>
           </div>
 
@@ -323,24 +320,32 @@ export default function VolunteerReviewForm({ data }: { data: Application }) {
 
       {/* Admin Notes */}
       <div>
-        <label className="block font-menu text-[13px] font-semibold text-gray-700 mb-1">
-          Ghi Chú Nội Bộ <span className="text-gray-400 font-normal">(Chỉ Admin xem)</span>
+        <label className="block font-bold text-gray-400 text-[11px] tracking-widest uppercase ml-1 mb-2">
+          Ghi Chú Nội Bộ <span className="text-gray-300 font-normal normal-case italic">(Chỉ Admin xem)</span>
         </label>
         <textarea
           value={adminNotes}
           onChange={e => setAdminNotes(e.target.value)}
           rows={3}
           placeholder="Ví dụ: Kinh nghiệm tốt, thái độ nhiệt tình..."
-          className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[14px] font-menu focus:ring-2 focus:ring-[#f08c50]/20 focus:border-[#f08c50] focus:bg-white transition resize-none"
+          className="w-full bg-gray-50/50 border border-gray-100 rounded-xl px-4 py-3 font-vietnam text-[14px] text-gray-700 placeholder-gray-400 focus:bg-white focus:border-blue-200 focus:ring-4 focus:ring-blue-100/20 transition-all outline-none resize-none shadow-sm"
         />
       </div>
 
       <button
         type="submit"
         disabled={loading || !newStatus}
-        className="px-8 py-2.5 rounded-xl font-menu text-[14px] font-semibold text-white bg-[#1a1a1a] hover:bg-black transition shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+        className="px-8 py-3.5 rounded-xl font-bold text-[14px] text-white bg-[#101828] hover:bg-black transition-all shadow-lg shadow-gray-200 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
       >
-        {loading ? 'Đang lưu...' : '💾 Lưu Quyết Định'}
+        {loading ? (
+          <div className="flex items-center gap-2">
+            <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Đang lưu...
+          </div>
+        ) : '💾 Lưu Quyết Định Hồ Sơ'}
       </button>
 
       <ConfirmModal 

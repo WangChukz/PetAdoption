@@ -21,6 +21,7 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { getPetImageUrl } from '@/lib/imageUtils';
 import CustomDropdown from '@/app/admin/components/CustomDropdown';
+import ModernDatePicker from '@/app/components/ModernDatePicker';
 
 interface PetProfileHeaderProps {
   pet: any;
@@ -134,32 +135,37 @@ export default function PetProfileHeader({
                 </div>
               </div>
             ) : (
-              <div className="relative group">
+              <div className="flex flex-col md:flex-row items-center gap-3 w-full">
+                <h1 className="text-2xl font-bold text-[#101828] font-menu">{pet.name}</h1>
+                <div className="relative group">
                   <span className={`px-4 py-1.5 text-[11px] font-normal rounded-[10px] tracking-wider ${statusInfo.color} whitespace-nowrap shadow-sm border border-current/10 flex items-center gap-1.5`}>
                     {statusInfo.label}
                   </span>
                 </div>
+              </div>
             )}
           </div>
 
-          <div className="flex flex-wrap gap-y-3 gap-x-6 text-[13px] text-gray-500 font-menu w-full max-w-[500px] md:max-w-none">
+          <div className="flex flex-wrap gap-y-3 gap-x-6 text-[13px] text-gray-500 w-full max-w-[500px] md:max-w-none">
             <div className="flex items-center justify-start gap-2 whitespace-nowrap min-w-0">
-              <span className="p-1.5 bg-gray-50 rounded-lg text-gray-400 flex-shrink-0">
-                <AtSign className="w-3.5 h-3.5" />
+              <AtSign className="w-4.5 h-4.5 text-gray-400" />
+              <span className="truncate font-bold uppercase tracking-tight">
+                ID: {(!pet.id || pet.id === 0) ? (
+                  <span className="text-emerald-500 bg-emerald-50/50 px-2 py-0.5 rounded-lg text-[11px] animate-pulse">HỒ SƠ MỚI</span>
+                ) : (
+                  `#${pet.id.toString().padStart(4, '0')}`
+                )}
               </span>
-              <span className="truncate">ID: #{pet.id.toString().padStart(4, '0')}</span>
             </div>
             
-            <div className="flex items-center justify-start gap-2 text-[13px] text-gray-500 font-menu whitespace-nowrap min-w-0">
-               <span className="p-1.5 bg-gray-50 rounded-lg text-[#101828] flex-shrink-0">
-                 {(isEditing ? editData.gender : pet.gender) === 'male' ? (
-                   <Mars className="w-3.5 h-3.5 text-blue-500" />
-                 ) : (isEditing ? editData.gender : pet.gender) === 'female' ? (
-                   <Venus className="w-3.5 h-3.5 text-pink-500" />
-                 ) : (
-                   <HelpCircle className="w-3.5 h-3.5 text-gray-400" />
-                 )}
-               </span>
+            <div className="flex items-center justify-start gap-2 whitespace-nowrap min-w-0">
+               {(isEditing ? editData.gender : pet.gender) === 'male' ? (
+                 <Mars className="w-4.5 h-4.5 text-blue-400" />
+               ) : (isEditing ? editData.gender : pet.gender) === 'female' ? (
+                 <Venus className="w-4.5 h-4.5 text-rose-400" />
+               ) : (
+                 <HelpCircle className="w-4.5 h-4.5 text-gray-300" />
+               )}
                {isEditing ? (
                  <CustomDropdown
                    options={[
@@ -177,10 +183,8 @@ export default function PetProfileHeader({
                )}
             </div>
  
-            <div className="flex items-center justify-start gap-2 text-gray-900 font-medium whitespace-nowrap min-w-0">
-                <span className="p-1.5 bg-gray-50 rounded-lg text-gray-400 flex-shrink-0">
-                  <Dna className="w-3.5 h-3.5" />
-                </span>
+            <div className="flex items-center justify-start gap-2 whitespace-nowrap min-w-0">
+                <Dna className="w-4.5 h-4.5 text-gray-400" />
                 {isEditing ? (
                 <input 
                   type="text"
@@ -195,9 +199,7 @@ export default function PetProfileHeader({
             </div>
 
             <div className="flex items-center justify-start gap-2 whitespace-nowrap min-w-0">
-              <span className="p-1.5 bg-gray-50 rounded-lg text-gray-400 flex-shrink-0">
-                <Layers className="w-3.5 h-3.5" />
-              </span>
+              <Layers className="w-4.5 h-4.5 text-gray-400" />
               {isEditing ? (
                 <input 
                   type="text"
@@ -212,18 +214,56 @@ export default function PetProfileHeader({
             </div>
 
             <div className="flex items-center justify-start gap-2 whitespace-nowrap min-w-0">
-              <span className="p-1.5 bg-gray-50 rounded-lg text-gray-400 flex-shrink-0">
-                <Calendar className="w-3.5 h-3.5" />
-              </span>
+              <Calendar className="w-4.5 h-4.5 text-gray-400" />
               {isEditing ? (
-                <input 
-                  type="date"
-                  value={editData.intake_date ? format(new Date(editData.intake_date), 'yyyy-MM-dd') : ''}
-                  onChange={(e) => setEditData({...editData, intake_date: e.target.value})}
-                  className="bg-gray-50 border border-gray-100 rounded-[10px] px-3 py-1 outline-none focus:border-orange-200 text-[12px] font-medium"
+                <div className="flex items-center gap-1.5">
+                  <input 
+                    type="number"
+                    value={editData.age_months >= 12 && (editData.age_unit === 'year' || !editData.age_unit) 
+                      ? Math.floor(editData.age_months / 12) 
+                      : editData.age_months || ''}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 0;
+                      const unit = editData.age_unit || (editData.age_months >= 12 ? 'year' : 'month');
+                      setEditData({
+                        ...editData, 
+                        age_months: unit === 'year' ? val * 12 : val,
+                        age_unit: unit
+                      });
+                    }}
+                    placeholder="Tuổi..."
+                    className="bg-gray-50 border border-gray-100 rounded-[10px] px-2 py-1 outline-none focus:border-orange-200 w-16 text-[13px] font-bold"
+                  />
+                  <select 
+                    value={editData.age_unit || (editData.age_months >= 12 ? 'year' : 'month')}
+                    onChange={(e) => setEditData({ ...editData, age_unit: e.target.value })}
+                    className="bg-transparent border-none text-[11px] font-bold text-gray-400 outline-none cursor-pointer"
+                  >
+                    <option value="month">th</option>
+                    <option value="year">tuổi</option>
+                  </select>
+                </div>
+              ) : (
+                <span className="truncate">
+                  {pet.age_months >= 12 
+                    ? `${Math.floor(pet.age_months / 12)} tuổi` 
+                    : `${pet.age_months || 0} tháng`}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center justify-start gap-2 whitespace-nowrap min-w-0">
+              {isEditing ? (
+                <ModernDatePicker 
+                  value={editData.intake_date || ''}
+                  onChange={(val) => setEditData({...editData, intake_date: val})}
+                  className="w-40"
                 />
               ) : (
-                <span className="truncate">Tiếp nhận: {pet.pet_profile?.intake_date ? format(new Date(pet.pet_profile.intake_date), 'MMM d, yyyy') : 'N/A'}</span>
+                <>
+                  <Calendar className="w-4.5 h-4.5 text-gray-400" />
+                  <span className="truncate">Tiếp nhận: {pet.pet_profile?.intake_date ? format(new Date(pet.pet_profile.intake_date), 'dd/MM/yyyy') : 'N/A'}</span>
+                </>
               )}
             </div>
           </div>

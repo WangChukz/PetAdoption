@@ -2,9 +2,11 @@
 
 import Image from 'next/image';
 import React, { useState } from 'react';
+import ModernDatePicker from '@/app/components/ModernDatePicker';
 
 export default function DonationSection() {
   const [activeTab, setActiveTab] = useState<'financial' | 'food'>('financial');
+  const [dob, setDob] = useState('');
 
   const handleDonationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,12 +84,12 @@ export default function DonationSection() {
               />
             </div>
 
-            <div className="flex flex-col gap-1">
-              <input 
-                type="date" 
-                placeholder="Date of birth" 
-                required
-                className="w-full border border-gray-200 border-opacity-70 rounded px-4 py-3 font-menu text-[14px] text-gray-700 outline-none focus:border-[#0489a9] transition text-gray-400 focus:text-gray-700"
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-bold text-gray-400 ml-1">Ngày sinh nhật</label>
+              <ModernDatePicker 
+                value={dob}
+                onChange={setDob}
+                placeholder="Ngày/Tháng/Năm"
               />
             </div>
 

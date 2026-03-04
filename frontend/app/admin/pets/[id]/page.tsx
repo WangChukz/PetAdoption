@@ -101,8 +101,10 @@ export default function PetDetailPage() {
         headers['Content-Type'] = 'application/json';
       }
 
+      const isFormData = !!editData.newImageFile;
+      
       const res = await fetchAPI(`/admin/pets/${id}`, {
-        method: 'POST', // Use POST with _method spoofing if formData, or just PUT if JSON (fetchAPI handles JSON Content-Type)
+        method: isFormData ? 'POST' : 'PUT',
         body,
         headers
       });
@@ -202,9 +204,9 @@ export default function PetDetailPage() {
         onCancel={handleCancel}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column (2/3 width) */}
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        {/* Row 1: About & Gallery */}
+        <div className="lg:col-span-2">
           <PetProfileAbout 
             pet={pet} 
             isEditing={isEditing}
@@ -212,6 +214,14 @@ export default function PetDetailPage() {
             setEditData={setEditData}
             refreshData={fetchPetData} 
           />
+        </div>
+
+        <div className="lg:col-span-1">
+          <PetProfileGallery pet={pet} refreshData={fetchPetData} isEditing={isEditing} />
+        </div>
+
+        {/* Row 2: Medical & Stats - Same Height */}
+        <div className="lg:col-span-2">
           <PetProfileMedical 
             pet={pet} 
             isEditing={isEditing}
@@ -221,10 +231,7 @@ export default function PetDetailPage() {
           />
         </div>
 
-        {/* Right Column (1/3 width) */}
-        <div className="space-y-6">
-          <PetProfileTasks pet={pet} refreshData={fetchPetData} />
-          <PetProfileGallery pet={pet} refreshData={fetchPetData} />
+        <div className="lg:col-span-1">
           <PetProfileStats 
             pet={pet} 
             isEditing={isEditing}
@@ -233,6 +240,13 @@ export default function PetDetailPage() {
             refreshData={fetchPetData} 
           />
         </div>
+
+        {/* Row 3: Caretaker & Tasks - Full Width */}
+        {!isEditing && (
+          <div className="lg:col-span-3">
+            <PetProfileTasks pet={pet} refreshData={fetchPetData} />
+          </div>
+        )}
       </div>
 
     </div>

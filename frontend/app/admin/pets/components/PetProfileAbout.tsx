@@ -47,46 +47,61 @@ export default function PetProfileAbout({
   };
 
   return (
-    <div className="bg-white rounded-[10px] border border-gray-100 p-5 shadow-sm space-y-4">
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center text-orange-500">
-          <FileText className="w-5 h-5" />
+    <div className="bg-white rounded-[16px] border border-gray-100 p-6 shadow-sm space-y-6 h-full flex flex-col font-vietnam">
+      <div className="flex items-center gap-3">
+        <FileText className="w-6 h-6 text-gray-400/80" />
+        <div>
+          <h3 className="text-[16px] font-bold text-[#101828]">Câu chuyện về {pet.name}</h3>
+          <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Giới thiệu ngắn gọn</p>
         </div>
-        <h3 className="text-lg font-bold text-[#101828] font-menu">Thông tin về {pet.name}</h3>
       </div>
 
-      <div className="text-[15px] text-gray-600 leading-relaxed font-menu">
+      <div className="flex-1 flex flex-col space-y-2">
         {isEditing ? (
-          <textarea 
-            value={editData.description || ''}
-            onChange={(e) => setEditData({...editData, description: e.target.value})}
-            placeholder="Nhập mô tả chi tiết về thú cưng..."
-            className="w-full min-h-[80px] p-3 bg-gray-50 border border-gray-100 rounded-[10px] outline-none focus:border-orange-200 transition-all resize-none"
-          />
+          <div className="relative flex-1 flex flex-col">
+            <textarea 
+              value={editData.description || ''}
+              onChange={(e) => {
+                if (e.target.value.length <= 1000) {
+                  setEditData({...editData, description: e.target.value});
+                }
+              }}
+              placeholder="Chia sẻ một chút về tính cách hoặc hoàn cảnh của thú cưng (tối đa 1000 ký tự)..."
+              className="w-full flex-1 min-h-[120px] p-4 bg-gray-50/50 border border-gray-100 rounded-xl outline-none focus:border-orange-200 transition-all resize-none text-[14px] leading-relaxed text-gray-600 font-normal"
+            />
+            <div className={`absolute bottom-3 right-3 text-[10px] font-bold px-2 py-1 rounded-md ${
+              (editData.description?.length || 0) > 900 ? 'bg-red-50 text-red-400' : 'bg-white/80 text-gray-400'
+            }`}>
+              {editData.description?.length || 0}/1000
+            </div>
+          </div>
         ) : (
-          pet.description || "Chưa có mô tả chi tiết cho thú cưng này. Vui lòng bổ sung để người dùng có cái nhìn rõ hơn về tính cách và thói quen của chúng."
+          <div className="text-[14px] text-gray-500 leading-loose font-normal italic bg-gray-50/30 p-4 rounded-xl border border-dashed border-gray-100 max-h-[220px] overflow-y-auto custom-scrollbar">
+            {pet.description || "Chưa có câu chuyện nào được chia sẻ. Hãy bổ sung để giúp mọi người dễ dàng kết nối với bé hơn nhé!"}
+          </div>
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4 pt-2">
         <div className="flex items-center gap-2">
-          <Smile className="w-4 h-4 text-orange-400" />
-          <h4 className="text-[13px] font-bold text-gray-400 uppercase tracking-wider font-menu">Tính cách & Đặc điểm</h4>
+          <Smile className="w-4.5 h-4.5 text-gray-400/80" />
+          <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Đặc điểm nổi bật</h4>
         </div>
         <div className="flex flex-wrap gap-2">
           {personalityTags.length > 0 ? (
             personalityTags.map((tag: string, index: number) => (
               <span 
                 key={index}
-                className={`px-3 py-1.5 flex items-center gap-2 text-[#101828] text-[12.5px] font-medium rounded-[10px] border border-gray-100 transition-all whitespace-nowrap ${
-                  isEditing ? 'bg-orange-50 border-orange-100 hover:bg-orange-100' : 'bg-gray-50 hover:border-orange-200 hover:bg-orange-50/30'
+                className={`px-3 py-1.5 flex items-center gap-2 text-[#101828] text-[12.5px] font-medium rounded-xl border border-gray-100 transition-all whitespace-nowrap ${
+                  isEditing ? 'bg-orange-50 border-orange-100 hover:bg-orange-100' : 'bg-white hover:border-orange-200 hover:bg-orange-50/30'
                 }`}
               >
+                <span className="w-1 h-1 bg-orange-400 rounded-full" />
                 {tag}
                 {isEditing && (
                   <button 
                     onClick={() => removeTag(tag)}
-                    className="text-orange-400 hover:text-orange-600"
+                    className="text-orange-400 hover:text-orange-600 p-0.5 hover:bg-orange-100 rounded-md transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -94,22 +109,22 @@ export default function PetProfileAbout({
               </span>
             ))
           ) : !isEditing && (
-            <span className="text-sm text-gray-400 italic">Chưa xác định đặc điểm</span>
+            <span className="text-sm text-gray-400 italic font-normal">Chưa xác định đặc điểm</span>
           )}
 
           {isEditing && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 bg-gray-50/50 p-1 rounded-xl border border-gray-100 focus-within:border-orange-200 transition-colors">
               <input 
                 type="text"
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addTag()}
                 placeholder="Thêm đặc điểm..."
-                className="w-32 px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-[10px] text-[12.5px] outline-none focus:border-orange-200"
+                className="bg-transparent px-2 py-1 text-[12.5px] outline-none w-28 font-normal"
               />
               <button 
                 onClick={addTag}
-                className="p-1.5 bg-orange-500 text-white rounded-[10px] hover:bg-orange-600 transition-colors"
+                className="p-1.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors active:scale-90"
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>

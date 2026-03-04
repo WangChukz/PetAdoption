@@ -13,13 +13,13 @@ async function getVolunteer(id: string) {
 }
 
 const STATUS_META: Record<string, { label: React.ReactNode; color: string }> = {
-  pending:             { label: <span className="flex items-center gap-1.5"><Clock3 className="w-3.5 h-3.5" />Chờ Duyệt</span>,          color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-  cv_passed:           { label: <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" />CV Đạt</span>,            color: 'bg-blue-100 text-blue-800 border-blue-200' },
-  cv_rejected:         { label: <span className="flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5" />CV Không Đạt</span>,      color: 'bg-red-100 text-red-800 border-red-200' },
-  interview_scheduled: { label: <span className="flex items-center gap-1.5"><CalendarCheck2 className="w-3.5 h-3.5" />Lịch PV Xác Nhận</span>, color: 'bg-purple-100 text-purple-800 border-purple-200' },
-  interviewing:        { label: <span className="flex items-center gap-1.5"><Mic2 className="w-3.5 h-3.5" />Đang Phỏng Vấn</span>,   color: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
-  passed:              { label: <span className="flex items-center gap-1.5"><PartyPopper className="w-3.5 h-3.5" />Đã Nhận Vào Đội</span>,  color: 'bg-green-100 text-green-800 border-green-200' },
-  rejected:            { label: <span className="flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5" />Từ Chối</span>,           color: 'bg-red-100 text-red-800 border-red-200' },
+  pending:             { label: <span className="flex items-center gap-1.5"><Clock3 className="w-3.5 h-3.5" />Chờ Duyệt</span>,          color: 'bg-amber-50 text-amber-600 border-amber-100' },
+  cv_passed:           { label: <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" />CV Đạt</span>,            color: 'bg-blue-50 text-blue-600 border-blue-100' },
+  cv_rejected:         { label: <span className="flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5" />CV Không Đạt</span>,      color: 'bg-rose-50 text-rose-600 border-rose-100' },
+  interview_scheduled: { label: <span className="flex items-center gap-1.5"><CalendarCheck2 className="w-3.5 h-3.5" />Lịch PV Xác Nhận</span>, color: 'bg-purple-50 text-purple-600 border-purple-100' },
+  interviewing:        { label: <span className="flex items-center gap-1.5"><Mic2 className="w-3.5 h-3.5" />Đang Phỏng Vấn</span>,   color: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
+  passed:              { label: <span className="flex items-center gap-1.5"><PartyPopper className="w-3.5 h-3.5" />Đã Nhận Vào Đội</span>,  color: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
+  rejected:            { label: <span className="flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5" />Từ Chối</span>,           color: 'bg-rose-50 text-rose-600 border-rose-100' },
 };
 
 export default async function AdminVolunteerReviewPage({ params }: { params: Promise<{ id: string }> }) {
@@ -33,28 +33,28 @@ export default async function AdminVolunteerReviewPage({ params }: { params: Pro
     <div className="max-w-6xl mx-auto flex flex-col gap-6">
 
       {/* ── Page Header ── */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 font-vietnam">
         <div className="flex items-center gap-4">
           <Link
             href="/admin/volunteers"
-            className="flex items-center justify-center w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-xl transition shrink-0"
+            className="flex items-center justify-center w-10 h-10 bg-white border border-gray-100 hover:bg-gray-50 rounded-xl shadow-sm transition-all active:scale-95 shrink-0"
           >
-            <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <svg className="w-4.5 h-4.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
           <div>
-            <h1 className="font-menu font-black text-[#1a1a1a] text-[22px] leading-tight">
+            <h1 className="font-bold text-[#101828] text-[22px] leading-tight">
               Hồ Sơ #{data.id} — {data.name}
             </h1>
-            <p className="font-menu text-gray-400 text-[13px] mt-0.5">
+            <p className="text-gray-400 text-[13px] mt-0.5 font-medium">
               Ngày nộp: {new Date(data.created_at).toLocaleString('vi-VN')}
             </p>
           </div>
         </div>
 
         {/* Status Badge */}
-        <span className={`shrink-0 px-4 py-1.5 rounded-full border font-menu font-bold text-[13px] ${statusMeta.color}`}>
+        <span className={`shrink-0 px-4 py-1.5 rounded-lg border font-bold text-[13px] ${statusMeta.color} shadow-sm`}>
           {statusMeta.label}
         </span>
       </div>
@@ -66,10 +66,10 @@ export default async function AdminVolunteerReviewPage({ params }: { params: Pro
         <div className="flex flex-col gap-6">
 
           {/* Editable Applicant Info Card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-menu font-black text-[#1a1a1a] text-[17px]">Thông Tin Ứng Viên</h2>
-              <span className="font-menu text-[12px] text-gray-400 bg-gray-50 border border-gray-200 px-3 py-1 rounded-full">Có thể chỉnh sửa</span>
+          <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 p-8 font-vietnam">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-bold text-[#101828] text-[17px]">Thông Tin Ứng Viên</h2>
+              <span className="text-[11px] font-bold text-gray-400 bg-gray-50 border border-gray-100 px-3 py-1 rounded-lg uppercase tracking-wider">Có thể chỉnh sửa</span>
             </div>
             <VolunteerInfoEditForm data={{
               id: data.id,
@@ -83,8 +83,8 @@ export default async function AdminVolunteerReviewPage({ params }: { params: Pro
           </div>
 
           {/* CV Card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7">
-            <h2 className="font-menu font-black text-[#1a1a1a] text-[17px] mb-5">Hồ Sơ (CV / Portfolio)</h2>
+          <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 p-8 font-vietnam">
+            <h2 className="font-bold text-[#101828] text-[17px] mb-6">Hồ Sơ (CV / Portfolio)</h2>
             {data.cv_path ? (
               <CvViewer cvPath={data.cv_path} />
             ) : (
@@ -115,10 +115,10 @@ export default async function AdminVolunteerReviewPage({ params }: { params: Pro
           )}
 
           {/* Review Decision Card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-2 h-2 rounded-full bg-[#f08c50] inline-block"></span>
-              <h2 className="font-menu font-black text-[#1a1a1a] text-[17px]">Đánh Giá Hồ Sơ</h2>
+          <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 p-7 font-vietnam">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#f08c50] inline-block shadow-sm shadow-orange-200"></span>
+              <h2 className="font-bold text-[#101828] text-[17px]">Đánh Giá Hồ Sơ</h2>
             </div>
             <p className="font-menu text-gray-400 text-[13px] mb-2 ml-4">
               Cập nhật trạng thái sau khi xem CV hoặc phỏng vấn xong.

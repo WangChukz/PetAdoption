@@ -1,24 +1,41 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { Plus, Loader2, Image as ImageIcon, X } from 'lucide-react';
+import { 
+  Plus, 
+  Loader2, 
+  Image as ImageIcon, 
+  Trash2,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
 import { fetchAPI } from '@/lib/api';
 import { toast } from 'react-hot-toast';
 import { getPetImageUrl } from '@/lib/imageUtils';
+import ConfirmModal from '../../components/ConfirmModal';
 
 interface PetProfileGalleryProps {
   pet: any;
   refreshData: () => void;
+  isEditing?: boolean;
 }
 
-export default function PetProfileGallery({ pet, refreshData }: PetProfileGalleryProps) {
+export default function PetProfileGallery({ pet, refreshData, isEditing = false }: PetProfileGalleryProps) {
   const [uploading, setUploading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (pet.gallery?.length >= 4) {
+      toast.error('Bộ sưu tập chỉ cho phép tối đa 4 ảnh');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
 
     setUploading(true);
     const formData = new FormData();
@@ -45,17 +62,22 @@ export default function PetProfileGallery({ pet, refreshData }: PetProfileGaller
     }
   };
 
-  const handleDeleteGalleryImage = async (imageId: number) => {
-    if (!confirm('Bạn có chắc muốn xóa ảnh này khỏi bộ sưu tập?')) return;
+  const handleDeleteGalleryImage = (imageId: number) => {
+    setSelectedImageId(imageId);
+    setIsDeleteModalOpen(true);
+  };
 
-    setDeletingId(imageId);
+  const confirmDelete = async () => {
+    if (selectedImageId === null) return;
+
+    setDeletingId(selectedImageId);
     try {
-      const res = await fetchAPI(`/admin/pets/gallery/${imageId}`, {
+      const res = await fetchAPI(`/admin/pets/gallery/${selectedImageId}`, {
         method: 'DELETE'
       });
 
       if (res.success) {
-        toast.success('Đã xóa ảnh');
+        toast.success('Đã xóa ảnh khỏi bộ sưu tập');
         refreshData();
       } else {
         toast.error(res.message || 'Lỗi khi xóa ảnh');
@@ -65,13 +87,36 @@ export default function PetProfileGallery({ pet, refreshData }: PetProfileGaller
       toast.error('Có lỗi xảy ra khi xóa ảnh');
     } finally {
       setDeletingId(null);
+      setIsDeleteModalOpen(false);
+      setSelectedImageId(null);
     }
   };
 
   return (
-    <div className="bg-white rounded-[10px] border border-gray-100 p-6 shadow-sm space-y-5">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest font-menu">Bộ sưu tập</h3>
+    <div className="bg-white rounded-[16px] border border-gray-100 p-6 shadow-sm h-full flex flex-col font-vietnam">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <ImageIcon className="w-6 h-6 text-gray-400/80" />
+          <div>
+            <h4 className="text-[16px] font-bold text-[#101828]">Bộ sưu tập</h4>
+            <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Hình ảnh thực tế</p>
+          </div>
+        </div>
+        
+        {isEditing && (pet.gallery?.length < 4) && (
+          <button 
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all active:scale-90 disabled:opacity-50"
+            title="Thêm ảnh"
+          >
+            {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
+          </button>
+        )}
+      </div>
+
+      <div className="flex-1 flex flex-col min-h-0">
         <input 
           type="file" 
           ref={fileInputRef}
@@ -79,60 +124,69 @@ export default function PetProfileGallery({ pet, refreshData }: PetProfileGaller
           accept="image/*"
           onChange={handleGalleryUpload}
         />
-        <button 
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
-          title="Thêm ảnh"
-        >
-          {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-        </button>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        {/* Main Image */}
-        <div className="aspect-square rounded-xl overflow-hidden border border-gray-100 bg-gray-50 relative group">
-          <img 
-            src={getPetImageUrl(pet.image_url)} 
-            alt={pet.name}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <span className="text-[10px] text-white font-bold uppercase tracking-wider bg-black/50 px-2 py-1 rounded-full">Ảnh chính</span>
-          </div>
-        </div>
-
-        {/* Gallery Images */}
-        {pet.gallery?.map((img: any) => (
-          <div key={img.id} className="aspect-square rounded-xl overflow-hidden border border-gray-100 bg-gray-50 relative group">
-            <img 
-              src={getPetImageUrl(img.image_url)} 
-              alt="Gallery"
-              className="w-full h-full object-cover transition-transform group-hover:scale-110"
-            />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <button 
-                onClick={() => handleDeleteGalleryImage(img.id)}
-                disabled={deletingId === img.id}
-                className="p-2 bg-red-500 text-white rounded-lg shadow-lg hover:bg-red-600 transition-all scale-90 group-hover:scale-100 disabled:opacity-50"
+        
+        <div className="grid grid-cols-2 gap-3 overflow-y-auto pr-1 custom-scrollbar pb-2">
+          {pet.gallery?.length > 0 ? (
+            pet.gallery.map((img: any, index: number) => (
+              <div 
+                key={img.id || index} 
+                className="aspect-square rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 relative group"
               >
-                {deletingId === img.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-        ))}
+                <img 
+                  src={getPetImageUrl(img.image_url)} 
+                  alt={`Gallery ${index}`} 
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                />
+                
+                {isEditing && (
+                  <button 
+                    type="button"
+                    onClick={() => handleDeleteGalleryImage(img.id)}
+                    disabled={deletingId === img.id}
+                    className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 shadow-sm"
+                  >
+                    {deletingId === img.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  </button>
+                )}
+              </div>
+            ))
+          ) : (
+            !isEditing && (
+              <div className="col-span-2 py-12 flex flex-col items-center justify-center text-center space-y-3 opacity-40">
+                <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-gray-300">
+                  <ImageIcon className="w-6 h-6" />
+                </div>
+                <p className="text-[13px] font-medium">Chưa có ảnh trong bộ sưu tập</p>
+              </div>
+            )
+          )}
 
-        {/* Upload Placeholder */}
-        <div 
-          onClick={() => fileInputRef.current?.click()}
-          className="aspect-square rounded-xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center gap-2 bg-gray-50 text-gray-400 hover:border-blue-200 hover:bg-blue-50/30 transition-all cursor-pointer group"
-        >
-          <div className="p-2 bg-white rounded-lg shadow-sm group-hover:scale-110 transition-transform">
-            <ImageIcon className="w-5 h-5 text-blue-400" />
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider">Tải lên</span>
+          {isEditing && (pet.gallery?.length < 4) && (
+            <button 
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="aspect-square rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50/50 flex flex-col items-center justify-center gap-2 hover:border-blue-200 hover:bg-blue-50/30 transition-all group"
+            >
+              <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-gray-300 group-hover:scale-110 group-hover:text-blue-400 transition-all">
+                <Plus className="w-5 h-5" />
+              </div>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Thêm ảnh</span>
+            </button>
+          )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Xác nhận xóa ảnh"
+        message="Bạn có chắc chắn muốn xóa ảnh này khỏi bộ sưu tập? Hành động này không thể hoàn tác."
+        confirmText="Xác nhận xóa"
+        cancelText="Hủy bỏ"
+        type="danger"
+        isLoading={deletingId !== null}
+      />
     </div>
   );
 }

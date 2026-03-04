@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale';
 
 import { 
   Plus, 
@@ -35,9 +37,11 @@ type Pet = {
   id: number;
   name: string;
   species: string;
+  age_months: number;
   breed: string | null;
   pet_profile?: {
     status: string;
+    intake_date: string | null;
   };
   gender: 'male' | 'female' | 'unknown';
   image_url: string | null;
@@ -414,8 +418,14 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
                       </td>
                       <td className="px-4 py-4 border-r border-gray-50/50 whitespace-nowrap">
                          <div className="flex flex-col gap-0.5">
-                           <span className="text-[13.5px] text-gray-800 font-normal">2 tuổi</span>
-                           <span className="text-[10px] text-gray-400 font-normal">Tiêu chuẩn</span>
+                           <span className="text-[13.5px] text-gray-800 font-normal">
+                             {pet.age_months >= 12 
+                               ? `${Math.floor(pet.age_months / 12)} tuổi` 
+                               : `${pet.age_months} tháng`}
+                           </span>
+                           <span className="text-[10px] text-gray-400 font-normal">
+                             {pet.breed || 'Tiêu chuẩn'}
+                           </span>
                          </div>
                       </td>
                       <td className="px-4 py-4 text-center border-r border-gray-50/50 whitespace-nowrap">
@@ -430,7 +440,9 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
                          })()}
                       </td>
                       <td className="px-6 py-4 text-center border-r border-gray-50/50 text-gray-600 text-[13.5px] font-normal tracking-tight whitespace-nowrap">
-                         12 / 10 / 2023
+                         {pet.pet_profile?.intake_date 
+                           ? format(new Date(pet.pet_profile.intake_date), 'dd / MM / yyyy') 
+                           : 'N/A'}
                       </td>
                       <td className="px-6 py-4 text-center whitespace-nowrap">
                          <div className="flex items-center justify-center gap-2">

@@ -50,18 +50,50 @@ export default function PetForm({ initialData, isEdit }: Props) {
       weight_kg: profile.weight_kg ?? '',
       is_vaccinated: !!profile.is_vaccinated,
       is_neutered: !!profile.is_neutered,
-      medical_history: profile.medical_history || {},
+      medical_history: Array.isArray(profile.medical_history) ? profile.medical_history : [],
       intake_date: profile.intake_date ?? new Date().toISOString(),
     };
   });
 
   const [galleryImages, setGalleryImages] = useState<{file: File, preview: string}[]>([]);
+  const [nextId, setNextId] = useState<number>(0);
   const galleryInputRef = React.useRef<HTMLInputElement>(null);
+  const scrollGalleryRef = React.useRef<HTMLDivElement>(null);
+
+  // Fetch next ID for new pets
+  useEffect(() => {
+    if (!isEdit) {
+      const fetchNextId = async () => {
+        try {
+          const res = await fetchAPI('/admin/pets');
+          const pets = Array.isArray(res) ? res : (res.data || []);
+          if (pets.length > 0) {
+            const maxId = Math.max(...pets.map((p: any) => p.id));
+            setNextId(maxId + 1);
+          } else {
+            setNextId(1);
+          }
+        } catch (error) {
+          console.error("Failed to fetch pets for next ID", error);
+        }
+      };
+      fetchNextId();
+    }
+  }, [isEdit]);
+
+  const scrollGallery = (direction: 'left' | 'right') => {
+    if (!scrollGalleryRef.current) return;
+    const scrollAmount = 150;
+    scrollGalleryRef.current.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth'
+    });
+  };
 
   // A "mock" pet object used by sub-components for layout/labels
   const [mockPet, setMockPet] = useState<any>(() => ({
     ...initialData,
-    id: initialData?.id ?? 0, // Mock ID for creation mode
+    id: initialData?.id || 0, 
     name: editData.name || (isEdit ? initialData?.name : 'Tên thú cưng mới'),
     pet_profile: initialData?.pet_profile || { 
       status: 'AVAILABLE',
@@ -69,21 +101,41 @@ export default function PetForm({ initialData, isEdit }: Props) {
     }
   }));
 
+  // Sync nextId into mockPet
+  useEffect(() => {
+    if (!isEdit && nextId > 0) {
+      setMockPet(prev => ({ ...prev, id: nextId }));
+    }
+  }, [nextId, isEdit]);
+
   // Sync mockPet for header display
   useEffect(() => {
     setMockPet((prev: any) => ({
       ...prev,
       name: editData.name || (isEdit ? initialData?.name : 'Tên thú cưng mới'),
+      age_months: editData.age_months,
       pet_profile: {
         ...prev.pet_profile,
-        intake_date: editData.intake_date
+        intake_date: editData.intake_date,
+        medical_history: editData.medical_history
       }
     }));
-  }, [editData.name, editData.intake_date, isEdit, initialData]);
+  }, [editData.name, editData.age_months, editData.intake_date, editData.medical_history, isEdit, initialData]);
 
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
+    
+    if (galleryImages.length + files.length > 4) {
+      toast.error('Bạn chỉ có thể chọn tối đa 4 ảnh cho bộ sưu tập');
+      // Only take what fits
+      const remainingSlots = 4 - galleryImages.length;
+      if (remainingSlots <= 0) {
+        if (galleryInputRef.current) galleryInputRef.current.value = '';
+        return;
+      }
+      files.splice(remainingSlots);
+    }
     
     const newImages = files.map(file => ({
       file,
@@ -171,10 +223,10 @@ export default function PetForm({ initialData, isEdit }: Props) {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 max-w-7xl mx-auto space-y-6 font-vietnam">
       {/* breadcrumbs mirroring detail page */}
       <div className="flex items-center justify-between py-1 gap-4">
-        <div className="flex items-center gap-2 text-[13px] font-menu whitespace-nowrap overflow-hidden">
+        <div className="flex items-center gap-2 text-[13px] whitespace-nowrap overflow-hidden">
           <button 
             onClick={() => router.push('/admin/pets')}
             className="text-gray-400 hover:text-[#101828] transition-colors"
@@ -189,10 +241,10 @@ export default function PetForm({ initialData, isEdit }: Props) {
         
         <button 
           onClick={handleCancel}
-          className="group flex items-center gap-2 text-gray-500 hover:text-[#101828] transition-all bg-white border border-gray-100 px-3 py-1.5 rounded-lg shadow-sm hover:shadow-md"
+          className="group flex items-center gap-2 text-gray-500 hover:text-[#101828] transition-all bg-white border border-gray-100 px-4 py-2 rounded-xl shadow-sm hover:shadow-md"
         >
           <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          <span className="text-xs font-bold font-menu">Quay lại</span>
+          <span className="text-xs font-bold">Quay lại</span>
         </button>
       </div>
 
@@ -209,8 +261,9 @@ export default function PetForm({ initialData, isEdit }: Props) {
         onCancel={handleCancel}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        {/* Row 1: About & Gallery */}
+        <div className="lg:col-span-2">
           <PetProfileAbout 
             pet={mockPet} 
             isEditing={true}
@@ -218,6 +271,81 @@ export default function PetForm({ initialData, isEdit }: Props) {
             setEditData={setEditData}
             refreshData={() => {}} 
           />
+        </div>
+
+        <div className="lg:col-span-1">
+          {/* If creation mode, use the internal gallery preview. If edit mode, the gallery is often managed separately or we can use the Gallery component if supported */}
+          {!isEdit ? (
+            <div className="bg-white rounded-[16px] border border-gray-100 p-6 shadow-sm h-full flex flex-col">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h4 className="text-[16px] font-bold text-[#101828]">Bộ sưu tập</h4>
+                  <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Chọn tối đa 4 ảnh</p>
+                </div>
+                
+                {galleryImages.length < 4 && (
+                  <button 
+                    type="button"
+                    onClick={() => galleryInputRef.current?.click()}
+                    className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all active:scale-90"
+                  >
+                    <Plus className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex-1 flex flex-col min-h-0">
+                <input 
+                  type="file" 
+                  ref={galleryInputRef}
+                  className="hidden" 
+                  multiple
+                  accept="image/*"
+                  onChange={handleGalleryChange}
+                />
+                
+                <div className="grid grid-cols-2 gap-3 overflow-y-auto pr-1 custom-scrollbar pb-2">
+                  {galleryImages.map((img, index) => (
+                    <div 
+                      key={index} 
+                      className="aspect-square rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 relative group"
+                    >
+                      <img src={img.preview} alt="Preview" className="w-full h-full object-cover" />
+                      <button 
+                        type="button"
+                        onClick={() => removeGalleryImage(index)}
+                        className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+
+                  {galleryImages.length < 4 && (
+                    <button 
+                      type="button"
+                      onClick={() => galleryInputRef.current?.click()}
+                      className="aspect-square rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50/50 flex flex-col items-center justify-center gap-2 hover:border-blue-200 hover:bg-blue-50/30 transition-all group"
+                    >
+                      <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-gray-300 group-hover:scale-110 group-hover:text-blue-400 transition-all">
+                        <Plus className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center truncate px-1">Tải ảnh</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            // In edit mode, we can show the existing gallery manager component
+            <div className="h-full">
+               <PetProfileGallery pet={initialData} refreshData={() => router.refresh()} isEditing={true} />
+            </div>
+          )}
+        </div>
+
+        {/* Row 2: Medical & Stats - Balanced Height */}
+        <div className="lg:col-span-2">
           <PetProfileMedical 
             pet={mockPet} 
             isEditing={true}
@@ -227,56 +355,7 @@ export default function PetForm({ initialData, isEdit }: Props) {
           />
         </div>
 
-        <div className="space-y-6">
-          {!isEdit && (
-            <div className="bg-white rounded-[10px] border border-gray-100 p-5 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="text-[14px] font-bold text-gray-400 uppercase tracking-widest font-menu">Bộ sưu tập</h4>
-                <input 
-                  type="file" 
-                  ref={galleryInputRef}
-                  className="hidden" 
-                  multiple
-                  accept="image/*"
-                  onChange={handleGalleryChange}
-                />
-                <button 
-                  type="button"
-                  onClick={() => galleryInputRef.current?.click()}
-                  className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                {galleryImages.map((img, index) => (
-                  <div key={index} className="aspect-square rounded-xl overflow-hidden border border-gray-100 bg-gray-50 relative group">
-                    <img src={img.preview} alt="Preview" className="w-full h-full object-cover" />
-                    <button 
-                      type="button"
-                      onClick={() => removeGalleryImage(index)}
-                      className="absolute top-1.5 right-1.5 p-1 bg-red-500 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-
-                <button 
-                  type="button"
-                  onClick={() => galleryInputRef.current?.click()}
-                  className="aspect-square rounded-xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center gap-2 bg-gray-50 text-gray-400 hover:border-blue-200 hover:bg-blue-50/30 transition-all group"
-                >
-                  <div className="p-2 bg-white rounded-lg shadow-sm group-hover:scale-110 transition-transform">
-                    <ImageIcon className="w-5 h-5 text-blue-400" />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider">Thêm ảnh</span>
-                </button>
-              </div>
-            </div>
-          )}
-
+        <div className="lg:col-span-1">
           <PetProfileStats 
             pet={mockPet} 
             isEditing={true}
