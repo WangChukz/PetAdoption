@@ -164,7 +164,7 @@ class VolunteerController extends Controller
 
         $cvPath = null;
         if ($request->hasFile('cv')) {
-            $cvPath = $request->file('cv')->store('cvs', 'public');
+            $cvPath = \App\Helpers\UploadHelper::upload($request->file('cv'), 'cvs');
         }
 
         $application = VolunteerApplication::create([

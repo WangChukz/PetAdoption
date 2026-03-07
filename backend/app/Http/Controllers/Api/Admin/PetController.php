@@ -96,7 +96,7 @@ class PetController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $validated['image_url'] = $request->file('image')->store('pets', 'public');
+            $validated['image_url'] = \App\Helpers\UploadHelper::upload($request->file('image'), 'pets');
         }
         unset($validated['image']);
 
@@ -140,7 +140,7 @@ class PetController extends Controller
         // Create gallery images
         if (!empty($galleryFiles)) {
             foreach ($galleryFiles as $index => $file) {
-                $url = $file->store('pets/gallery', 'public');
+                $url = \App\Helpers\UploadHelper::upload($file, 'pets/gallery');
                 $pet->gallery()->create([
                     'image_url' => $url,
                     'sort_order' => $index
@@ -183,8 +183,8 @@ class PetController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            if ($pet->image_url) Storage::disk('public')->delete($pet->image_url);
-            $validated['image_url'] = $request->file('image')->store('pets', 'public');
+            if ($pet->image_url) \App\Helpers\UploadHelper::delete($pet->image_url);
+            $validated['image_url'] = \App\Helpers\UploadHelper::upload($request->file('image'), 'pets');
         }
         unset($validated['image']);
 
@@ -247,7 +247,7 @@ class PetController extends Controller
             'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
-        $url = $request->file('image')->store('pets/gallery', 'public');
+        $url = \App\Helpers\UploadHelper::upload($request->file('image'), 'pets/gallery');
         
         $image = $pet->gallery()->create([
             'image_url' => $url,
@@ -260,7 +260,7 @@ class PetController extends Controller
     public function deleteGalleryImage(\App\Models\PetImage $image): JsonResponse
     {
         if ($image->image_url) {
-            Storage::disk('public')->delete($image->image_url);
+            \App\Helpers\UploadHelper::delete($image->image_url);
         }
         
         $image->delete();
@@ -319,9 +319,8 @@ class PetController extends Controller
     public function destroy(Pet $pet): JsonResponse
     {
         try {
-            // Delete image from storage if it exists
             if ($pet->image_url) {
-                Storage::disk('public')->delete($pet->image_url);
+                \App\Helpers\UploadHelper::delete($pet->image_url);
             }
 
             // Delete associated adoption applications (missing cascade in migration)
