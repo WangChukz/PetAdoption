@@ -20,6 +20,7 @@ import PetProfileHeader from '@/app/admin/pets/components/PetProfileHeader';
 import PetProfileAbout from '@/app/admin/pets/components/PetProfileAbout';
 import PetProfileStats from '@/app/admin/pets/components/PetProfileStats';
 import PetProfileMedical from '@/app/admin/pets/components/PetProfileMedical';
+import PetProfileGallery from '@/app/admin/pets/components/PetProfileGallery';
 
 type Props = {
   initialData?: any;
@@ -104,7 +105,7 @@ export default function PetForm({ initialData, isEdit }: Props) {
   // Sync nextId into mockPet
   useEffect(() => {
     if (!isEdit && nextId > 0) {
-      setMockPet(prev => ({ ...prev, id: nextId }));
+      setMockPet((prev: any) => ({ ...prev, id: nextId }));
     }
   }, [nextId, isEdit]);
 

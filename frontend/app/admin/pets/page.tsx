@@ -20,9 +20,11 @@ type Pet = {
   id: number;
   name: string;
   species: string;
+  age_months: number;
   breed: string | null;
   pet_profile?: {
     status: string;
+    intake_date: string | null;
   };
   gender: 'male' | 'female' | 'unknown';
   image_url: string | null;
