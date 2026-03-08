@@ -22,7 +22,7 @@ interface PetProfileGalleryProps {
   galleryItems?: {id?: number, preview: string, file?: File, isExisting?: boolean}[];
   onAdd?: () => void;
   onRemove?: (index: number) => void;
-  onImageClick?: (url: string) => void;
+  onImageClick?: (index: number) => void;
 }
 
 export default function PetProfileGallery({ 
@@ -124,7 +124,7 @@ export default function PetProfileGallery({
         <div 
           key={index} 
           className="aspect-square rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 relative group cursor-zoom-in"
-          onClick={() => onImageClick?.(item.preview)}
+          onClick={() => onImageClick?.(index)}
         >
           <img 
             src={item.preview} 
@@ -152,7 +152,7 @@ export default function PetProfileGallery({
       <div 
         key={img.id || index} 
         className="aspect-square rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 relative group cursor-zoom-in"
-        onClick={() => onImageClick?.(getPetImageUrl(img.image_url))}
+        onClick={() => onImageClick?.(index)}
       >
         <img 
           src={getPetImageUrl(img.image_url)} 

@@ -240,49 +240,132 @@ export default function PetForm({ initialData, isEdit }: Props) {
   };
 
   // Lightbox State
-  const [lightbox, setLightbox] = useState<{ isOpen: boolean, image: string | null }>({
+  const [lightbox, setLightbox] = useState<{ isOpen: boolean, currentIndex: number }>({
     isOpen: false,
-    image: null
+    currentIndex: 0
   });
 
-  const openLightbox = (image: string) => {
-    setLightbox({ isOpen: true, image });
+  const openLightbox = (index: number) => {
+    setLightbox({ isOpen: true, currentIndex: index });
   };
 
   const closeLightbox = () => {
-    setLightbox({ isOpen: false, image: null });
+    setLightbox(prev => ({ ...prev, isOpen: false }));
   };
+
+  const nextImage = useCallback(() => {
+    if (galleryItems.length <= 1) return;
+    setLightbox(prev => ({
+      ...prev,
+      currentIndex: (prev.currentIndex + 1) % galleryItems.length
+    }));
+  }, [galleryItems.length]);
+
+  const prevImage = useCallback(() => {
+    if (galleryItems.length <= 1) return;
+    setLightbox(prev => ({
+      ...prev,
+      currentIndex: (prev.currentIndex - 1 + galleryItems.length) % galleryItems.length
+    }));
+  }, [galleryItems.length]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!lightbox.isOpen) return;
+      if (e.key === 'ArrowRight') nextImage();
+      if (e.key === 'ArrowLeft') prevImage();
+      if (e.key === 'Escape') closeLightbox();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightbox.isOpen, nextImage, prevImage]);
 
   const handleCancel = () => {
     router.back();
   };
 
+  const currentLightboxImage = galleryItems[lightbox.currentIndex]?.preview;
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6 font-vietnam relative">
       {/* Lightbox Modal */}
-      {lightbox.isOpen && (
+      {lightbox.isOpen && currentLightboxImage && (
         <div 
-          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-10 transition-all duration-500 animate-in fade-in"
+          className="fixed inset-0 z-[9999] bg-black/98 backdrop-blur-2xl flex items-center justify-center transition-all duration-500 animate-in fade-in"
           onClick={closeLightbox}
         >
-          <button 
-            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all hover:rotate-90 active:scale-90"
-            onClick={closeLightbox}
-          >
-            <X className="w-6 h-6" />
-          </button>
+          {/* Controls Overlay */}
+          <div className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between z-10">
+            <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
+              <span className="text-white/90 text-sm font-bold tracking-wider">
+                {lightbox.currentIndex + 1} / {galleryItems.length}
+              </span>
+            </div>
+            
+            <button 
+              className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all hover:rotate-90 active:scale-90 border border-white/10"
+              onClick={closeLightbox}
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Navigation Arrows */}
+          {galleryItems.length > 1 && (
+            <>
+              <button 
+                className="absolute left-6 z-20 p-4 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all active:scale-95 border border-white/10 group"
+                onClick={(e) => { e.stopPropagation(); prevImage(); }}
+              >
+                <ChevronLeft className="w-8 h-8 group-hover:-translate-x-1 transition-transform" />
+              </button>
+              
+              <button 
+                className="absolute right-6 z-20 p-4 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all active:scale-95 border border-white/10 group"
+                onClick={(e) => { e.stopPropagation(); nextImage(); }}
+              >
+                <ChevronRight className="w-8 h-8 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </>
+          )}
           
           <div 
-            className="relative max-w-5xl w-full max-h-full flex items-center justify-center"
+            className="relative w-full h-full flex items-center justify-center p-4 md:p-12"
             onClick={(e) => e.stopPropagation()}
           >
-            <img 
-              src={lightbox.image!} 
-              alt="Zoomed" 
-              className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl ring-1 ring-white/10 animate-in zoom-in-95 duration-300" 
-            />
-            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/10">
-              <p className="text-white/70 text-[11px] font-bold uppercase tracking-[0.2em]">Xem trước hình ảnh</p>
+            {/* Navigation Arrows - Inside the image area for better reach */}
+            {galleryItems.length > 1 && (
+              <>
+                <button 
+                  className="absolute left-4 md:left-8 z-20 p-4 md:p-5 bg-black/20 hover:bg-white text-white hover:text-black rounded-full transition-all active:scale-90 border border-white/10 group backdrop-blur-md"
+                  onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                >
+                  <ChevronLeft className="w-6 h-6 md:w-8 md:h-8 group-hover:-translate-x-1 transition-transform" />
+                </button>
+                
+                <button 
+                  className="absolute right-4 md:right-8 z-20 p-4 md:p-5 bg-black/20 hover:bg-white text-white hover:text-black rounded-full transition-all active:scale-90 border border-white/10 group backdrop-blur-md"
+                  onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                >
+                  <ChevronRight className="w-6 h-6 md:w-8 md:h-8 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </>
+            )}
+
+            <div className="relative w-full h-full flex items-center justify-center max-w-[95vw] max-h-[90vh]">
+              <img 
+                key={lightbox.currentIndex}
+                src={currentLightboxImage} 
+                alt="Zoomed" 
+                className="max-w-full max-h-full object-contain rounded-2xl shadow-[0_0_80px_rgba(0,0,0,0.8)] ring-1 ring-white/20 animate-in zoom-in-95 fade-in duration-500 select-none" 
+              />
+              
+              <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+                <div className="px-5 py-2.5 bg-black/40 backdrop-blur-2xl rounded-full border border-white/10 shadow-2xl">
+                  <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.3em]">Hồ sơ thú cưng • {lightbox.currentIndex + 1}/{galleryItems.length}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -346,7 +429,7 @@ export default function PetForm({ initialData, isEdit }: Props) {
                galleryItems={galleryItems}
                onAdd={() => galleryInputRef.current?.click()}
                onRemove={(index: number) => removeGalleryItem(index)}
-               onImageClick={(url: string) => openLightbox(url)}
+               onImageClick={(index: number) => openLightbox(index)}
              />
              <input 
                type="file" 
