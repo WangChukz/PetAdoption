@@ -32,9 +32,15 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}): Pro
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }
-    } catch (error) {
-       console.error('[fetchAPI] Failed to get cookies on server side', error);
+    } catch (error: any) {
+       // Suppress "Dynamic server usage" log during build, it's a Next.js signal
+       if (!error.message?.includes('Dynamic server usage')) {
+         console.error('[fetchAPI] Server side cookie access error:', error.message);
+       }
        url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+       // If it is dynamic server usage, and we are catching it, 
+       // we might be accidentally swallowing a signal Next.js needs.
+       // However, marking pages with force-dynamic is the preferred fix.
     }
   } else {
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;

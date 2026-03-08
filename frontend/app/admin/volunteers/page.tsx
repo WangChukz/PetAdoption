@@ -1,6 +1,7 @@
-import React from 'react';
 import { fetchAPI } from '@/lib/api';
 import VolunteerListingClient from './components/VolunteerListingClient';
+
+export const dynamic = 'force-dynamic';
 
 type VolunteerApplication = {
   id: number;

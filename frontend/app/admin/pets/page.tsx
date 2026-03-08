@@ -16,6 +16,8 @@ import {
 import { fetchAPI } from '@/lib/api';
 import PetListingClient from './components/PetListingClient';
 
+export const dynamic = 'force-dynamic';
+
 type Pet = {
   id: number;
   name: string;
