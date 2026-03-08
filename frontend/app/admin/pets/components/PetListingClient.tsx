@@ -350,10 +350,10 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
       </div>
 
       {/* Unified Card Container */}
-      <div className="bg-white rounded-[10px] shadow-sm border border-gray-100 flex flex-col overflow-hidden mb-8">
+      <div className="bg-white rounded-[10px] shadow-sm border border-gray-100 flex flex-col mb-8">
         
         {/* Filter Section (Top Component) */}
-        <div className="px-5 py-3.5 border-b border-gray-50 bg-white">
+        <div className="px-5 py-3.5 border-b border-gray-50 bg-white relative z-50">
           <div className="flex flex-wrap items-center gap-3">
             {/* Main Filters */}
             <CustomDropdown 
