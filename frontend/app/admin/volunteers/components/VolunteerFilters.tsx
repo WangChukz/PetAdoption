@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, ChevronDown, ListFilter, Check } from 'lucide-react';
+import { Search, ChevronDown, SlidersHorizontal, Check, FilterX } from 'lucide-react';
+import CustomDateRangePicker from '@/app/admin/components/CustomDateRangePicker';
 
 const positions = [
   { label: 'Tất cả vị trí', value: '' },
@@ -34,6 +35,8 @@ export default function VolunteerFilters() {
 
   const currentStatus = searchParams.get('status') || '';
   const currentPosition = searchParams.get('position') || '';
+  const startDate = searchParams.get('start_date') || '';
+  const endDate = searchParams.get('end_date') || '';
 
   // Handle click outside to close dropdowns
   useEffect(() => {
@@ -68,79 +71,108 @@ export default function VolunteerFilters() {
     setPosOpen(false);
   };
 
-  return (
-    <div className="flex flex-col lg:flex-row items-center justify-between gap-4 py-4 font-vietnam relative z-20">
-      {/* Left: Custom Dropdowns */}
-      <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-        
-        {/* Status Dropdown */}
-        <div className="relative min-w-[180px]" ref={statusRef}>
-          <button
-            onClick={() => setStatusOpen(!statusOpen)}
-            className="w-full flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-[10px] px-4 py-2 text-[13px] font-medium text-gray-500 transition-all outline-none border border-transparent focus:border-gray-200"
-          >
-            <span>{statuses.find(s => s.value === currentStatus)?.label || 'Tất cả trạng thái'}</span>
-            <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-300 ${statusOpen ? 'rotate-180' : ''}`} />
-          </button>
-          
-          {statusOpen && (
-            <div className="absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
-              {statuses.map((s) => (
-                <button
-                  key={s.value}
-                  onClick={() => updateParam('status', s.value)}
-                  className="w-full flex items-center justify-between px-4 py-2.5 text-[14px] text-gray-600 hover:bg-gray-50 hover:text-[#0489A0] transition-colors"
-                >
-                  <span className={currentStatus === s.value ? 'font-bold text-[#0489A0]' : ''}>{s.label}</span>
-                  {currentStatus === s.value && <Check className="w-4 h-4 text-[#0489A0]" />}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+  const updateDateRange = (start: string, end: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (start) params.set('start_date', start);
+    else params.delete('start_date');
+    if (end) params.set('end_date', end);
+    else params.delete('end_date');
+    params.set('page', '1');
+    router.push(`?${params.toString()}`);
+  }
 
-        {/* Position Dropdown */}
-        <div className="relative min-w-[200px]" ref={posRef}>
-          <button
-            onClick={() => setPosOpen(!posOpen)}
-            className="w-full flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-[10px] px-4 py-2 text-[13px] font-medium text-gray-500 transition-all outline-none border border-transparent focus:border-gray-200"
-          >
-            <span className="truncate">{positions.find(p => p.value === currentPosition)?.label || 'Tất cả vị trí'}</span>
-            <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-300 ${posOpen ? 'rotate-180' : ''}`} />
-          </button>
-          
-          {posOpen && (
-            <div className="absolute top-full left-0 w-full min-w-[220px] mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
-              {positions.map((p) => (
-                <button
-                  key={p.value}
-                  onClick={() => updateParam('position', p.value)}
-                  className="w-full flex items-center justify-between px-4 py-2.5 text-[14px] text-gray-600 hover:bg-gray-50 hover:text-[#0489A0] transition-colors text-left"
-                >
-                  <span className={currentPosition === p.value ? 'font-bold text-[#0489A0]' : ''}>{p.label}</span>
-                  {currentPosition === p.value && <Check className="w-4 h-4 text-[#0489A0]" />}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+  const resetFilters = () => {
+    setSearch('');
+    router.push('?');
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-3 py-4 font-vietnam relative z-20">
+      {/* Status Dropdown */}
+      <div className="relative min-w-[170px]" ref={statusRef}>
+        <button
+          onClick={() => setStatusOpen(!statusOpen)}
+          className="w-full flex items-center justify-between bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 rounded-[10px] px-4 py-2 text-[13px] font-medium text-gray-500 transition-all outline-none"
+        >
+          <span>{statuses.find(s => s.value === currentStatus)?.label || 'Trạng thái'}</span>
+          <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-300 ${statusOpen ? 'rotate-180' : ''}`} />
+        </button>
+        
+        {statusOpen && (
+          <div className="absolute top-full left-0 w-full min-w-[200px] mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+            {statuses.map((s) => (
+              <button
+                key={s.value}
+                onClick={() => updateParam('status', s.value)}
+                className="w-full flex items-center justify-between px-4 py-2.5 text-[14px] text-gray-600 hover:bg-gray-50 hover:text-[#0489A0] transition-colors"
+              >
+                <span className={currentStatus === s.value ? 'font-bold text-[#0489A0]' : ''}>{s.label}</span>
+                {currentStatus === s.value && <Check className="w-4 h-4 text-[#0489A0]" />}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Right: Search & Advanced Filter */}
-      <div className="flex items-center gap-3 w-full lg:w-auto lg:max-w-md">
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      {/* Position Dropdown */}
+      <div className="relative min-w-[170px]" ref={posRef}>
+        <button
+          onClick={() => setPosOpen(!posOpen)}
+          className="w-full flex items-center justify-between bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 rounded-[10px] px-4 py-2 text-[13px] font-medium text-gray-500 transition-all outline-none"
+        >
+          <span className="truncate">{positions.find(p => p.value === currentPosition)?.label || 'Vị trí'}</span>
+          <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-300 ${posOpen ? 'rotate-180' : ''}`} />
+        </button>
+        
+        {posOpen && (
+          <div className="absolute top-full left-0 w-full min-w-[220px] mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+            {positions.map((p) => (
+              <button
+                key={p.value}
+                onClick={() => updateParam('position', p.value)}
+                className="w-full flex items-center justify-between px-4 py-2.5 text-[14px] text-gray-600 hover:bg-gray-50 hover:text-[#0489A0] transition-colors text-left"
+              >
+                <span className={currentPosition === p.value ? 'font-bold text-[#0489A0]' : ''}>{p.label}</span>
+                {currentPosition === p.value && <Check className="w-4 h-4 text-[#0489A0]" />}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <CustomDateRangePicker 
+        startDate={startDate}
+        endDate={endDate}
+        onChange={updateDateRange}
+      />
+
+      {/* Reset Button */}
+      {(currentStatus || currentPosition || startDate || endDate || search) && (
+        <button 
+          onClick={resetFilters}
+          className="h-9 px-3 bg-red-50 hover:bg-red-100 text-red-500 rounded-[10px] transition-all flex items-center gap-2 group border border-red-100"
+          title="Xóa tất cả bộ lọc"
+        >
+          <FilterX className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
+          <span className="text-[11px] font-bold uppercase tracking-wider">Xóa</span>
+        </button>
+      )}
+
+      {/* Right side search and filter icon */}
+      <div className="ml-auto flex items-center gap-3">
+        <div className="relative w-[280px] group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#0489A0] transition-colors" />
           <input
             type="text"
             placeholder="Tìm kiếm ứng viên..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-gray-50 hover:bg-gray-100 border-none rounded-[10px] pl-10 pr-4 py-2 text-[13px] font-normal text-[#101828] placeholder-gray-400 outline-none transition-all"
+            className="w-full bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 rounded-[10px] pl-10 pr-4 py-2 text-[13px] font-normal text-[#101828] placeholder-gray-400 outline-none transition-all focus:border-[#0489A0] focus:ring-4 focus:ring-[#0489A0]/5"
           />
         </div>
         
-        <button className="p-2.5 bg-white border border-gray-100 rounded-[10px] text-gray-400 hover:text-[#0489A0] hover:bg-gray-50 transition-all shadow-sm active:scale-95">
-          <ListFilter className="w-4.5 h-4.5" />
+        <button className="p-2 bg-white border border-gray-100 rounded-[10px] text-gray-400 hover:text-[#0489A0] hover:bg-gray-50 transition-all shadow-sm group">
+          <SlidersHorizontal className="w-4 h-4 group-hover:scale-110 transition-transform" />
         </button>
       </div>
     </div>

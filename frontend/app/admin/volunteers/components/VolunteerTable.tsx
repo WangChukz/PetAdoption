@@ -116,9 +116,25 @@ export default function VolunteerTable({ volunteers }: { volunteers: Volunteer[]
                   </td>
                   <td className="px-6 py-6 whitespace-nowrap border-r border-gray-50/50">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-300 shadow-sm group-hover:shadow-md transition-shadow">
-                        <User className="w-5 h-5" />
-                      </div>
+                      {(() => {
+                        const firstLetter = v.name.trim().charAt(0).toUpperCase();
+                        const colors = [
+                          'bg-blue-50 text-blue-500 border-blue-100',
+                          'bg-emerald-50 text-emerald-500 border-emerald-100',
+                          'bg-purple-50 text-purple-500 border-purple-100',
+                          'bg-rose-50 text-rose-500 border-rose-100',
+                          'bg-orange-50 text-orange-500 border-orange-100',
+                          'bg-teal-50 text-teal-500 border-teal-100'
+                        ];
+                        // Select color based on ID to keep it consistent
+                        const colorClass = colors[v.id % colors.length];
+                        
+                        return (
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-[15px] border shadow-sm group-hover:shadow-md transition-all ${colorClass}`}>
+                            {firstLetter}
+                          </div>
+                        );
+                      })()}
                       <div>
                         <p className="text-[14px] font-bold text-[#101828] mb-0.5">{v.name}</p>
                         <p className="text-[12px] text-gray-400 font-medium">{v.email}</p>

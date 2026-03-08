@@ -29,6 +29,14 @@ class VolunteerController extends Controller
             $query->where('position', $request->get('position'));
         }
 
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
         $search = $request->get('q') ?? $request->get('search');
         if ($search) {
             $query->where(function ($q) use ($search) {
