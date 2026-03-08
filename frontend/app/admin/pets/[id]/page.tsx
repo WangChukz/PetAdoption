@@ -269,24 +269,7 @@ export default function PetDetailPage() {
             </button>
           </div>
 
-          {/* Navigation Arrows */}
-          {galleryItems.length > 1 && (
-            <>
-              <button 
-                className="absolute left-6 z-20 p-4 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all active:scale-95 border border-white/10 group"
-                onClick={(e) => { e.stopPropagation(); prevImage(); }}
-              >
-                <ChevronLeft className="w-8 h-8 group-hover:-translate-x-1 transition-transform" />
-              </button>
-              
-              <button 
-                className="absolute right-6 z-20 p-4 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all active:scale-95 border border-white/10 group"
-                onClick={(e) => { e.stopPropagation(); nextImage(); }}
-              >
-                <ChevronRight className="w-8 h-8 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </>
-          )}
+
 
           <div 
             className="relative w-full h-full flex items-center justify-center p-4 md:p-12"
