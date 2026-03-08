@@ -65,7 +65,9 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}): Pro
   const data = isJson ? await res.json() : await res.text();
 
   if (!res.ok) {
-    const message = typeof data === 'object' && data.error ? data.error : (data.message || 'Lỗi kết nối API');
+    const message = typeof data === 'object' 
+      ? (data.message || data.error || 'Lỗi kết nối API') 
+      : (data || 'Lỗi kết nối API');
     throw new Error(message);
   }
 
