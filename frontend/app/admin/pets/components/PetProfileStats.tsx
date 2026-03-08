@@ -136,9 +136,12 @@ export default function PetProfileStats({
             <div className="flex items-center gap-1 bg-gray-50/50 p-1 px-2 rounded-xl border border-gray-100 focus-within:border-orange-200 transition-colors">
               <input 
                 type="number"
-                value={editData.age_months >= 12 && (editData.age_unit === 'year' || !editData.age_unit) 
-                  ? Math.floor(editData.age_months / 12) 
-                  : editData.age_months || ''}
+                value={(() => {
+                  const unit = editData.age_unit || (editData.age_months >= 12 ? 'year' : 'month');
+                  return unit === 'year' 
+                    ? Math.floor(editData.age_months / 12) 
+                    : editData.age_months || '';
+                })()}
                 onChange={(e) => {
                   const val = parseInt(e.target.value) || 0;
                   const unit = editData.age_unit || (editData.age_months >= 12 ? 'year' : 'month');
@@ -152,7 +155,19 @@ export default function PetProfileStats({
               />
               <select 
                 value={editData.age_unit || (editData.age_months >= 12 ? 'year' : 'month')}
-                onChange={(e) => setEditData({ ...editData, age_unit: e.target.value })}
+                onChange={(e) => {
+                  const newUnit = e.target.value;
+                  const currentUnit = editData.age_unit || (editData.age_months >= 12 ? 'year' : 'month');
+                  const currentVal = currentUnit === 'year' 
+                    ? Math.floor(editData.age_months / 12) 
+                    : editData.age_months;
+                  
+                  setEditData({ 
+                    ...editData, 
+                    age_unit: newUnit,
+                    age_months: newUnit === 'year' ? currentVal * 12 : currentVal
+                  });
+                }}
                 className="bg-transparent text-[11px] font-bold text-gray-500 outline-none cursor-pointer hover:text-orange-500 transition-colors"
               >
                 <option value="month">tháng</option>

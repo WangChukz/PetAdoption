@@ -219,9 +219,12 @@ export default function PetProfileHeader({
                 <div className="flex items-center gap-1.5">
                   <input 
                     type="number"
-                    value={editData.age_months >= 12 && (editData.age_unit === 'year' || !editData.age_unit) 
-                      ? Math.floor(editData.age_months / 12) 
-                      : editData.age_months || ''}
+                    value={(() => {
+                      const unit = editData.age_unit || (editData.age_months >= 12 ? 'year' : 'month');
+                      return unit === 'year' 
+                        ? Math.floor(editData.age_months / 12) 
+                        : editData.age_months || '';
+                    })()}
                     onChange={(e) => {
                       const val = parseInt(e.target.value) || 0;
                       const unit = editData.age_unit || (editData.age_months >= 12 ? 'year' : 'month');
@@ -236,7 +239,19 @@ export default function PetProfileHeader({
                   />
                   <select 
                     value={editData.age_unit || (editData.age_months >= 12 ? 'year' : 'month')}
-                    onChange={(e) => setEditData({ ...editData, age_unit: e.target.value })}
+                    onChange={(e) => {
+                      const newUnit = e.target.value;
+                      const currentUnit = editData.age_unit || (editData.age_months >= 12 ? 'year' : 'month');
+                      const currentVal = currentUnit === 'year' 
+                        ? Math.floor(editData.age_months / 12) 
+                        : editData.age_months;
+                      
+                      setEditData({ 
+                        ...editData, 
+                        age_unit: newUnit,
+                        age_months: newUnit === 'year' ? currentVal * 12 : currentVal
+                      });
+                    }}
                     className="bg-transparent border-none text-[11px] font-bold text-gray-400 outline-none cursor-pointer"
                   >
                     <option value="month">th</option>
