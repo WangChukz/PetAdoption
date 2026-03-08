@@ -25,4 +25,16 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 401);
             }
         });
+
+        // Handle custom UploadException
+        $exceptions->render(function (\App\Exceptions\UploadException $e, \Illuminate\Http\Request $request) {
+            if ($request->is('api/*') || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'error'   => 'UPLOAD_ERROR',
+                    'details' => $e->getDetails()
+                ], 500);
+            }
+        });
     })->create();
