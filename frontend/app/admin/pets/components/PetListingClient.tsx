@@ -406,18 +406,6 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
               className="z-40"
             />
 
-            {/* Search Box - Compact */}
-            <div className="relative flex-1 min-w-[200px] max-w-[280px] group">
-              <input 
-                type="text" 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Tìm tên thú cưng..."
-                className="w-full bg-gray-50/50 border border-gray-100 rounded-[10px] pl-9 pr-4 py-2 text-[13px] font-normal focus:outline-none focus:border-[#3A8D9D] focus:ring-4 focus:ring-[#3A8D9D]/5 transition-all outline-none" 
-              />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 group-focus-within:text-[#3A8D9D] transition-colors" />
-            </div>
-
             {/* Reset Button */}
             {(filters.status || filters.species || filters.breed || filters.start_date || filters.end_date) && (
               <button 
@@ -441,7 +429,19 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
               </button>
             )}
 
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-3">
+              {/* Search Box - Compact & Right Aligned */}
+              <div className="relative w-[240px] group">
+                <input 
+                  type="text" 
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Tìm tên thú cưng..."
+                  className="w-full bg-gray-50/50 border border-gray-100 rounded-[10px] pl-9 pr-4 py-2 text-[13px] font-normal focus:outline-none focus:border-[#3A8D9D] focus:ring-4 focus:ring-[#3A8D9D]/5 transition-all outline-none" 
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 group-focus-within:text-[#3A8D9D] transition-colors" />
+              </div>
+
               <button className="p-2 bg-white border border-gray-100 rounded-[10px] text-gray-400 hover:text-[#3A8D9D] hover:bg-gray-50 transition-all shadow-sm group">
                 <SlidersHorizontal className="w-4 h-4 group-hover:scale-110 transition-transform" />
               </button>
