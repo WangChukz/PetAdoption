@@ -40,6 +40,7 @@ Route::prefix('admin')
 
         // Pets CRUD
         Route::get('/pets/metadata', [\App\Http\Controllers\Api\Admin\PetController::class, 'metadata']);
+        Route::post('/pets/bulk-delete', [\App\Http\Controllers\Api\Admin\PetController::class, 'bulkDelete']);
         Route::apiResource('pets', \App\Http\Controllers\Api\Admin\PetController::class);
         Route::patch('/pets/{pet}/status', [\App\Http\Controllers\Api\Admin\PetController::class, 'updateStatus']);
         Route::post('/pets/{pet}/logs', [\App\Http\Controllers\Api\Admin\PetController::class, 'addLog']);

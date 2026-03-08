@@ -316,11 +316,59 @@ class PetController extends Controller
         return response()->json(['success' => true, 'data' => $task]);
     }
 
+    public function bulkDelete(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:pets,id'
+        ]);
+
+        $ids = $validated['ids'];
+        $pets = Pet::whereIn('id', $ids)->get();
+
+        try {
+            foreach ($pets as $pet) {
+                // Delete main image
+                if ($pet->image_url) {
+                    \App\Helpers\UploadHelper::delete($pet->image_url);
+                }
+
+                // Delete gallery images
+                foreach ($pet->gallery as $image) {
+                    if ($image->image_url) {
+                        \App\Helpers\UploadHelper::delete($image->image_url);
+                    }
+                }
+
+                // Adoption applications and profiles are handled by cascade or manual delete
+                $pet->adoptionApplications()->delete();
+                $pet->delete();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "Đã xóa thành công " . count($ids) . " hồ sơ thú cưng"
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi xóa nhiều hồ sơ: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function destroy(Pet $pet): JsonResponse
     {
         try {
             if ($pet->image_url) {
                 \App\Helpers\UploadHelper::delete($pet->image_url);
+            }
+
+            // Delete gallery images
+            foreach ($pet->gallery as $image) {
+                if ($image->image_url) {
+                    \App\Helpers\UploadHelper::delete($image->image_url);
+                }
             }
 
             // Delete associated adoption applications (missing cascade in migration)
