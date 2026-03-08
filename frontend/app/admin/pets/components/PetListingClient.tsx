@@ -352,104 +352,108 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
       <div className="bg-white rounded-[10px] shadow-sm border border-gray-100 flex flex-col overflow-hidden mb-8">
         
         {/* Filter Section (Top Component) */}
-        <div className="px-5 py-4 border-b border-gray-50 bg-white">
-          <div className="flex flex-col xl:flex-row gap-4 items-center justify-between">
-            {/* Filter Dropdowns Container */}
-            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-              <CustomDropdown 
-                placeholder="Trạng thái"
-                options={[
-                  { id: '', label: 'Tất cả trạng thái' },
-                  { id: 'READY_FOR_ADOPTION', label: 'Chờ nhận nuôi', color: 'bg-emerald-500' },
-                  { id: 'AVAILABLE', label: 'Đang tìm chủ', color: 'bg-emerald-500' },
-                  { id: 'ADOPTED', label: 'Đã có chủ', color: 'bg-blue-500' },
-                  { id: 'TREATMENT', label: 'Đang điều trị', color: 'bg-orange-500' },
-                  { id: 'FOSTERED', label: 'Chăm sóc tạm', color: 'bg-purple-500' },
-                  { id: 'INTAKE', label: 'Mới nhận', color: 'bg-gray-500' },
-                ]}
-                value={filters.status}
-                onChange={(val) => handleFilterChange('status', val)}
-                className="w-[170px]"
-              />
-              
-              <CustomDropdown 
-                placeholder="Loài"
-                options={[
-                  { id: '', label: 'Tất cả loài' },
-                  ...metadata.species.map(s => ({ id: s, label: s }))
-                ]}
-                value={filters.species}
-                onChange={(val) => handleFilterChange('species', val)}
-                className="w-[140px]"
-              />
+        <div className="px-5 py-3.5 border-b border-gray-50 bg-white">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Main Filters */}
+            <CustomDropdown 
+              placeholder="Trạng thái"
+              options={[
+                { id: '', label: 'Tất cả trạng thái' },
+                { id: 'READY_FOR_ADOPTION', label: 'Chờ nhận nuôi', color: 'bg-emerald-500' },
+                { id: 'AVAILABLE', label: 'Đang tìm chủ', color: 'bg-emerald-500' },
+                { id: 'ADOPTED', label: 'Đã có chủ', color: 'bg-blue-500' },
+                { id: 'TREATMENT', label: 'Đang điều trị', color: 'bg-orange-500' },
+                { id: 'FOSTERED', label: 'Chăm sóc tạm', color: 'bg-purple-500' },
+                { id: 'INTAKE', label: 'Mới nhận', color: 'bg-gray-500' },
+              ]}
+              value={filters.status}
+              onChange={(val) => handleFilterChange('status', val)}
+              className="w-[155px]"
+            />
+            
+            <CustomDropdown 
+              placeholder="Loài"
+              options={[
+                { id: '', label: 'Tất cả loài' },
+                ...metadata.species.map(s => ({ id: s, label: s }))
+              ]}
+              value={filters.species}
+              onChange={(val) => handleFilterChange('species', val)}
+              className="w-[120px]"
+            />
 
-              <CustomDropdown 
-                placeholder={filters.species ? "Giống loài" : "Chọn loài trước"}
-                options={[
-                  { id: '', label: 'Tất cả giống' },
-                  ...(filters.species ? (metadata.breeds[filters.species]?.map(b => ({ id: b, label: b })) || []) : [])
-                ]}
-                value={filters.breed}
-                onChange={(val) => handleFilterChange('breed', val)}
-                disabled={!filters.species}
-                className="w-[170px]"
-              />
+            <CustomDropdown 
+              placeholder={filters.species ? "Giống loài" : "Giống"}
+              options={[
+                { id: '', label: 'Tất cả giống' },
+                ...(filters.species ? (metadata.breeds[filters.species]?.map(b => ({ id: b, label: b })) || []) : [])
+              ]}
+              value={filters.breed}
+              onChange={(val) => handleFilterChange('breed', val)}
+              disabled={!filters.species}
+              className="w-[140px]"
+            />
 
-              <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-100 rounded-[10px] px-3 py-1.5 transition-all focus-within:border-[#3A8D9D] focus-within:bg-white">
-                <span className="text-[10px] font-black text-[#3A8D9D] uppercase tracking-wider">Từ</span>
+            {/* Date Filters Group */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-100 rounded-[10px] px-3 py-1.5 transition-all focus-within:border-[#3A8D9D] focus-within:bg-white group">
+                <span className="text-[9px] font-black text-gray-400 group-focus-within:text-[#3A8D9D] uppercase tracking-wider">Từ</span>
                 <input 
                   type="date" 
                   value={filters.start_date}
                   onChange={(e) => handleFilterChange('start_date', e.target.value)}
-                  className="bg-transparent border-none text-[13px] font-bold text-gray-700 focus:ring-0 p-0 cursor-pointer"
+                  className="bg-transparent border-none text-[12px] font-bold text-gray-700 focus:ring-0 p-0 cursor-pointer w-[100px]"
                 />
               </div>
 
-              <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-100 rounded-[10px] px-3 py-1.5 transition-all focus-within:border-[#3A8D9D] focus-within:bg-white">
-                <span className="text-[10px] font-black text-[#3A8D9D] uppercase tracking-wider">Đến</span>
+              <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-100 rounded-[10px] px-3 py-1.5 transition-all focus-within:border-[#3A8D9D] focus-within:bg-white group">
+                <span className="text-[9px] font-black text-gray-400 group-focus-within:text-[#3A8D9D] uppercase tracking-wider">Đến</span>
                 <input 
                   type="date" 
                   value={filters.end_date}
                   onChange={(e) => handleFilterChange('end_date', e.target.value)}
-                  className="bg-transparent border-none text-[13px] font-bold text-gray-700 focus:ring-0 p-0 cursor-pointer"
+                  className="bg-transparent border-none text-[12px] font-bold text-gray-700 focus:ring-0 p-0 cursor-pointer w-[100px]"
                 />
               </div>
-
-              {(filters.status || filters.species || filters.breed || filters.start_date || filters.end_date) && (
-                <button 
-                  onClick={() => {
-                    const reset = { 
-                      status: '', 
-                      species: '', 
-                      gender: '', 
-                      breed: '', 
-                      start_date: '', 
-                      end_date: '' 
-                    };
-                    setFilters(reset);
-                    fetchPets(1, search, reset);
-                  }}
-                  className="text-[11px] font-black text-gray-400 hover:text-red-500 px-2 transition-colors uppercase tracking-widest flex items-center gap-1.5 group"
-                >
-                  <FilterX className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
-                  Xóa lọc
-                </button>
-              )}
             </div>
 
-            {/* Search Input Widget */}
-            <div className="flex items-center gap-2 w-full xl:max-w-[420px]">
-              <div className="relative flex-1 group">
-                <input 
-                  type="text" 
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Lọc theo tên..."
-                  className="w-full bg-gray-50/50 border border-gray-100 rounded-[10px] pl-10 pr-4 py-2.5 text-[13px] font-menu font-medium focus:outline-none focus:border-[#3A8D9D] focus:ring-4 focus:ring-[#3A8D9D]/5 transition-all outline-none" 
-                />
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-[#3A8D9D] transition-colors" />
-              </div>
-              <button className="p-2.5 bg-white border border-gray-100 rounded-[10px] text-gray-400 hover:text-[#3A8D9D] hover:bg-gray-50 transition-all shadow-sm group">
+            {/* Search Box - Compact */}
+            <div className="relative flex-1 min-w-[200px] max-w-[300px] group">
+              <input 
+                type="text" 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Tìm tên thú cưng..."
+                className="w-full bg-gray-50/50 border border-gray-100 rounded-[10px] pl-9 pr-4 py-2 text-[13px] font-medium focus:outline-none focus:border-[#3A8D9D] focus:ring-4 focus:ring-[#3A8D9D]/5 transition-all outline-none" 
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 group-focus-within:text-[#3A8D9D] transition-colors" />
+            </div>
+
+            {/* Reset Button */}
+            {(filters.status || filters.species || filters.breed || filters.start_date || filters.end_date) && (
+              <button 
+                onClick={() => {
+                  const reset = { 
+                    status: '', 
+                    species: '', 
+                    gender: '', 
+                    breed: '', 
+                    start_date: '', 
+                    end_date: '' 
+                  };
+                  setFilters(reset);
+                  fetchPets(1, search, reset);
+                }}
+                className="h-9 px-3 bg-red-50 hover:bg-red-100 text-red-500 rounded-[10px] transition-all flex items-center gap-2 group border border-red-100"
+                title="Xóa tất cả bộ lọc"
+              >
+                <FilterX className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
+                <span className="text-[11px] font-black uppercase tracking-wider">Xóa</span>
+              </button>
+            )}
+
+            <div className="ml-auto flex items-center gap-2">
+              <button className="p-2 bg-white border border-gray-100 rounded-[10px] text-gray-400 hover:text-[#3A8D9D] hover:bg-gray-50 transition-all shadow-sm group">
                 <SlidersHorizontal className="w-4 h-4 group-hover:scale-110 transition-transform" />
               </button>
             </div>
