@@ -18,16 +18,36 @@ interface PetProfileGalleryProps {
   pet: any;
   refreshData: () => void;
   isEditing?: boolean;
+  // Controlled props
+  galleryItems?: {id?: number, preview: string, file?: File, isExisting?: boolean}[];
+  onAdd?: () => void;
+  onRemove?: (index: number) => void;
+  onImageClick?: (url: string) => void;
 }
 
-export default function PetProfileGallery({ pet, refreshData, isEditing = false }: PetProfileGalleryProps) {
+export default function PetProfileGallery({ 
+  pet, 
+  refreshData, 
+  isEditing = false,
+  galleryItems,
+  onAdd,
+  onRemove,
+  onImageClick
+}: PetProfileGalleryProps) {
   const [uploading, setUploading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const isControlled = !!galleryItems;
+
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isControlled && onAdd) {
+      onAdd();
+      return;
+    }
+
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -62,9 +82,15 @@ export default function PetProfileGallery({ pet, refreshData, isEditing = false 
     }
   };
 
-  const handleDeleteGalleryImage = (imageId: number) => {
-    setSelectedImageId(imageId);
-    setIsDeleteModalOpen(true);
+  const handleRemove = (index: number, imageId?: number) => {
+    if (isControlled && onRemove) {
+      onRemove(index);
+      return;
+    }
+    if (imageId) {
+      setSelectedImageId(imageId);
+      setIsDeleteModalOpen(true);
+    }
   };
 
   const confirmDelete = async () => {
@@ -92,6 +118,67 @@ export default function PetProfileGallery({ pet, refreshData, isEditing = false 
     }
   };
 
+  const renderGallery = () => {
+    if (isControlled) {
+      return galleryItems.map((item, index) => (
+        <div 
+          key={index} 
+          className="aspect-square rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 relative group cursor-zoom-in"
+          onClick={() => onImageClick?.(item.preview)}
+        >
+          <img 
+            src={item.preview} 
+            alt={`Gallery ${index}`} 
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+          />
+          
+          {isEditing && (
+            <button 
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove?.(index);
+              }}
+              className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 shadow-sm"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      ));
+    }
+
+    return pet.gallery?.map((img: any, index: number) => (
+      <div 
+        key={img.id || index} 
+        className="aspect-square rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 relative group cursor-zoom-in"
+        onClick={() => onImageClick?.(getPetImageUrl(img.image_url))}
+      >
+        <img 
+          src={getPetImageUrl(img.image_url)} 
+          alt={`Gallery ${index}`} 
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+        />
+        
+        {isEditing && (
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemove(index, img.id);
+            }}
+            disabled={deletingId === img.id}
+            className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 shadow-sm"
+          >
+            {deletingId === img.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+          </button>
+        )}
+      </div>
+    ));
+  };
+
+  const currentCount = isControlled ? galleryItems.length : (pet.gallery?.length || 0);
+
   return (
     <div className="bg-white rounded-[16px] border border-gray-100 p-6 shadow-sm h-full flex flex-col font-vietnam">
       <div className="flex items-center justify-between mb-6">
@@ -103,10 +190,10 @@ export default function PetProfileGallery({ pet, refreshData, isEditing = false 
           </div>
         </div>
         
-        {isEditing && (pet.gallery?.length < 4) && (
+        {isEditing && currentCount < 4 && (
           <button 
             type="button"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => isControlled ? onAdd?.() : fileInputRef.current?.click()}
             disabled={uploading}
             className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all active:scale-90 disabled:opacity-50"
             title="Thêm ảnh"
@@ -117,39 +204,19 @@ export default function PetProfileGallery({ pet, refreshData, isEditing = false 
       </div>
 
       <div className="flex-1 flex flex-col min-h-0">
-        <input 
-          type="file" 
-          ref={fileInputRef}
-          className="hidden" 
-          accept="image/*"
-          onChange={handleGalleryUpload}
-        />
+        {!isControlled && (
+          <input 
+            type="file" 
+            ref={fileInputRef}
+            className="hidden" 
+            accept="image/*"
+            onChange={handleGalleryUpload}
+          />
+        )}
         
         <div className="grid grid-cols-2 gap-3 overflow-y-auto pr-1 custom-scrollbar pb-2">
-          {pet.gallery?.length > 0 ? (
-            pet.gallery.map((img: any, index: number) => (
-              <div 
-                key={img.id || index} 
-                className="aspect-square rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 relative group"
-              >
-                <img 
-                  src={getPetImageUrl(img.image_url)} 
-                  alt={`Gallery ${index}`} 
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                />
-                
-                {isEditing && (
-                  <button 
-                    type="button"
-                    onClick={() => handleDeleteGalleryImage(img.id)}
-                    disabled={deletingId === img.id}
-                    className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 shadow-sm"
-                  >
-                    {deletingId === img.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                  </button>
-                )}
-              </div>
-            ))
+          {currentCount > 0 ? (
+            renderGallery()
           ) : (
             !isEditing && (
               <div className="col-span-2 py-12 flex flex-col items-center justify-center text-center space-y-3 opacity-40">
@@ -161,10 +228,10 @@ export default function PetProfileGallery({ pet, refreshData, isEditing = false 
             )
           )}
 
-          {isEditing && (pet.gallery?.length < 4) && (
+          {isEditing && currentCount < 4 && (
             <button 
               type="button"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => isControlled ? onAdd?.() : fileInputRef.current?.click()}
               className="aspect-square rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50/50 flex flex-col items-center justify-center gap-2 hover:border-blue-200 hover:bg-blue-50/30 transition-all group"
             >
               <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-gray-300 group-hover:scale-110 group-hover:text-blue-400 transition-all">

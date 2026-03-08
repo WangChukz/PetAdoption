@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { fetchAPI } from '@/lib/api';
 import { toast } from 'react-hot-toast';
+import { getPetImageUrl } from '@/lib/imageUtils';
 
 // Sub-components
 import PetProfileHeader from '@/app/admin/pets/components/PetProfileHeader';
@@ -56,10 +57,59 @@ export default function PetForm({ initialData, isEdit }: Props) {
     };
   });
 
-  const [galleryImages, setGalleryImages] = useState<{file: File, preview: string}[]>([]);
+  const [galleryItems, setGalleryItems] = useState<{id?: number, preview: string, file?: File, isExisting?: boolean}[]>([]);
+  const [deletedGalleryIds, setDeletedGalleryIds] = useState<number[]>([]);
   const [nextId, setNextId] = useState<number>(0);
   const galleryInputRef = React.useRef<HTMLInputElement>(null);
   const scrollGalleryRef = React.useRef<HTMLDivElement>(null);
+
+  // Initialize gallery from existing data
+  useEffect(() => {
+    if (initialData?.gallery) {
+      const items = initialData.gallery.map((img: any) => ({
+        id: img.id,
+        preview: getPetImageUrl(img.image_url),
+        isExisting: true
+      }));
+      setGalleryItems(items);
+    }
+  }, [initialData]);
+
+  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const files = Array.from(e.target.files);
+    
+    // Total count including existing and new ones minus marked for deletion
+    // Wait, let's just use the current galleryItems count
+    if (galleryItems.length + files.length > 4) {
+      toast.error('Bộ sưu tập chỉ cho phép tối đa 4 ảnh');
+      const remainingSlots = 4 - galleryItems.length;
+      if (remainingSlots <= 0) {
+        if (galleryInputRef.current) galleryInputRef.current.value = '';
+        return;
+      }
+      files.splice(remainingSlots);
+    }
+    
+    const newItems = files.map(file => ({
+      file,
+      preview: URL.createObjectURL(file),
+      isExisting: false
+    }));
+    
+    setGalleryItems(prev => [...prev, ...newItems]);
+    if (galleryInputRef.current) galleryInputRef.current.value = '';
+  };
+
+  const removeGalleryItem = (index: number) => {
+    const item = galleryItems[index];
+    if (item.isExisting && item.id) {
+      setDeletedGalleryIds(prev => [...prev, item.id!]);
+    } else if (item.file) {
+      URL.revokeObjectURL(item.preview);
+    }
+    setGalleryItems(prev => prev.filter((_, i) => i !== index));
+  };
 
   // Fetch next ID for new pets
   useEffect(() => {
@@ -123,39 +173,6 @@ export default function PetForm({ initialData, isEdit }: Props) {
     }));
   }, [editData.name, editData.age_months, editData.intake_date, editData.medical_history, isEdit, initialData]);
 
-  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    const files = Array.from(e.target.files);
-    
-    if (galleryImages.length + files.length > 4) {
-      toast.error('Bạn chỉ có thể chọn tối đa 4 ảnh cho bộ sưu tập');
-      // Only take what fits
-      const remainingSlots = 4 - galleryImages.length;
-      if (remainingSlots <= 0) {
-        if (galleryInputRef.current) galleryInputRef.current.value = '';
-        return;
-      }
-      files.splice(remainingSlots);
-    }
-    
-    const newImages = files.map(file => ({
-      file,
-      preview: URL.createObjectURL(file)
-    }));
-    
-    setGalleryImages(prev => [...prev, ...newImages]);
-    if (galleryInputRef.current) galleryInputRef.current.value = '';
-  };
-
-  const removeGalleryImage = (index: number) => {
-    setGalleryImages(prev => {
-      const updated = [...prev];
-      URL.revokeObjectURL(updated[index].preview);
-      updated.splice(index, 1);
-      return updated;
-    });
-  };
-
   const handleSave = async () => {
     if (!editData.name) {
       toast.error('Vui lòng nhập tên thú cưng');
@@ -191,10 +208,16 @@ export default function PetForm({ initialData, isEdit }: Props) {
         data.append('image', editData.newImageFile);
       }
 
-      // Gallery fields
-      galleryImages.forEach((img, index) => {
-        data.append(`gallery[${index}]`, img.file);
+      // Gallery fields (new images only)
+      const newImages = galleryItems.filter(item => !item.isExisting && item.file);
+      newImages.forEach((img, index) => {
+        data.append(`gallery[${index}]`, img.file!);
       });
+
+      // Deleted images IDs
+      if (isEdit && deletedGalleryIds.length > 0) {
+        data.append('deleted_gallery_ids', JSON.stringify(deletedGalleryIds));
+      }
 
       if (isEdit) data.append('_method', 'PUT');
 
@@ -204,9 +227,6 @@ export default function PetForm({ initialData, isEdit }: Props) {
         method: 'POST',
         body: data
       });
-
-      // res is already the json from fetchAPI
-      const json = res;
 
       toast.success(isEdit ? 'Đã cập nhật hồ sơ thành công' : 'Đã tạo hồ sơ thú cưng mới');
       router.push('/admin/pets');
@@ -219,12 +239,55 @@ export default function PetForm({ initialData, isEdit }: Props) {
     }
   };
 
+  // Lightbox State
+  const [lightbox, setLightbox] = useState<{ isOpen: boolean, image: string | null }>({
+    isOpen: false,
+    image: null
+  });
+
+  const openLightbox = (image: string) => {
+    setLightbox({ isOpen: true, image });
+  };
+
+  const closeLightbox = () => {
+    setLightbox({ isOpen: false, image: null });
+  };
+
   const handleCancel = () => {
     router.back();
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 font-vietnam">
+    <div className="p-6 max-w-7xl mx-auto space-y-6 font-vietnam relative">
+      {/* Lightbox Modal */}
+      {lightbox.isOpen && (
+        <div 
+          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-10 transition-all duration-500 animate-in fade-in"
+          onClick={closeLightbox}
+        >
+          <button 
+            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all hover:rotate-90 active:scale-90"
+            onClick={closeLightbox}
+          >
+            <X className="w-6 h-6" />
+          </button>
+          
+          <div 
+            className="relative max-w-5xl w-full max-h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img 
+              src={lightbox.image!} 
+              alt="Zoomed" 
+              className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl ring-1 ring-white/10 animate-in zoom-in-95 duration-300" 
+            />
+            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/10">
+              <p className="text-white/70 text-[11px] font-bold uppercase tracking-[0.2em]">Xem trước hình ảnh</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* breadcrumbs mirroring detail page */}
       <div className="flex items-center justify-between py-1 gap-4">
         <div className="flex items-center gap-2 text-[13px] whitespace-nowrap overflow-hidden">
@@ -275,74 +338,25 @@ export default function PetForm({ initialData, isEdit }: Props) {
         </div>
 
         <div className="lg:col-span-1">
-          {/* If creation mode, use the internal gallery preview. If edit mode, the gallery is often managed separately or we can use the Gallery component if supported */}
-          {!isEdit ? (
-            <div className="bg-white rounded-[16px] border border-gray-100 p-6 shadow-sm h-full flex flex-col">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h4 className="text-[16px] font-bold text-[#101828]">Bộ sưu tập</h4>
-                  <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Chọn tối đa 4 ảnh</p>
-                </div>
-                
-                {galleryImages.length < 4 && (
-                  <button 
-                    type="button"
-                    onClick={() => galleryInputRef.current?.click()}
-                    className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all active:scale-90"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-                )}
-              </div>
-
-              <div className="flex-1 flex flex-col min-h-0">
-                <input 
-                  type="file" 
-                  ref={galleryInputRef}
-                  className="hidden" 
-                  multiple
-                  accept="image/*"
-                  onChange={handleGalleryChange}
-                />
-                
-                <div className="grid grid-cols-2 gap-3 overflow-y-auto pr-1 custom-scrollbar pb-2">
-                  {galleryImages.map((img, index) => (
-                    <div 
-                      key={index} 
-                      className="aspect-square rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 relative group"
-                    >
-                      <img src={img.preview} alt="Preview" className="w-full h-full object-cover" />
-                      <button 
-                        type="button"
-                        onClick={() => removeGalleryImage(index)}
-                        className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))}
-
-                  {galleryImages.length < 4 && (
-                    <button 
-                      type="button"
-                      onClick={() => galleryInputRef.current?.click()}
-                      className="aspect-square rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50/50 flex flex-col items-center justify-center gap-2 hover:border-blue-200 hover:bg-blue-50/30 transition-all group"
-                    >
-                      <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-gray-300 group-hover:scale-110 group-hover:text-blue-400 transition-all">
-                        <Plus className="w-5 h-5" />
-                      </div>
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center truncate px-1">Tải ảnh</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            // In edit mode, we can show the existing gallery manager component
-            <div className="h-full">
-               <PetProfileGallery pet={initialData} refreshData={() => router.refresh()} isEditing={true} />
-            </div>
-          )}
+          <div className="h-full">
+             <PetProfileGallery 
+               pet={mockPet} 
+               refreshData={() => {}} 
+               isEditing={true} 
+               galleryItems={galleryItems}
+               onAdd={() => galleryInputRef.current?.click()}
+               onRemove={(index: number) => removeGalleryItem(index)}
+               onImageClick={(url: string) => openLightbox(url)}
+             />
+             <input 
+               type="file" 
+               ref={galleryInputRef}
+               className="hidden" 
+               multiple
+               accept="image/*"
+               onChange={handleGalleryChange}
+             />
+          </div>
         </div>
 
         {/* Row 2: Medical & Stats - Balanced Height */}

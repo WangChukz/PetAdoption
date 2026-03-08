@@ -33,11 +33,28 @@ export default function PetDetailPage() {
   const [editData, setEditData] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  const [galleryItems, setGalleryItems] = useState<{id?: number, preview: string, file?: File, isExisting?: boolean}[]>([]);
+  const [deletedGalleryIds, setDeletedGalleryIds] = useState<number[]>([]);
+  const [lightbox, setLightbox] = useState<{ isOpen: boolean, image: string | null }>({
+    isOpen: false,
+    image: null
+  });
+
   const fetchPetData = useCallback(async () => {
     try {
       const res = await fetchAPI(`/admin/pets/${id}`);
       if (res.success) {
         setPet(res.data);
+        // Initialize gallery state
+        if (res.data.gallery) {
+           setGalleryItems(res.data.gallery.map((img: any) => ({
+             id: img.id,
+             preview: getPetImageUrl(img.image_url),
+             isExisting: true
+           })));
+           setDeletedGalleryIds([]);
+        }
+
         // Initialize editData with fresh pet data
         setEditData({
           name: res.data.name,
@@ -78,35 +95,33 @@ export default function PetDetailPage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      let body: any;
-      let headers: any = {};
+      const formData = new FormData();
+      Object.entries(editData).forEach(([key, value]) => {
+        if (key === 'personality_tags' || key === 'medical_history') {
+          formData.append(key, JSON.stringify(value));
+        } else if (key === 'newImageFile') {
+          formData.append('image', value as File);
+        } else if (key !== 'imagePreview' && value !== null && value !== undefined) {
+          formData.append(key, value.toString());
+        }
+      });
 
-      if (editData.newImageFile) {
-        // Use FormData if image is changing
-        const formData = new FormData();
-        Object.entries(editData).forEach(([key, value]) => {
-          if (key === 'personality_tags' || key === 'medical_history') {
-            formData.append(key, JSON.stringify(value));
-          } else if (key === 'newImageFile') {
-            formData.append('image', value as File);
-          } else if (key !== 'imagePreview' && value !== null && value !== undefined) {
-            formData.append(key, value.toString());
-          }
-        });
-        formData.append('_method', 'PUT');
-        body = formData;
-      } else {
-        // Standard JSON if no image
-        body = JSON.stringify(editData);
-        headers['Content-Type'] = 'application/json';
+      // Gallery fields (new images only)
+      const newImages = galleryItems.filter(item => !item.isExisting && item.file);
+      newImages.forEach((img, index) => {
+        formData.append(`gallery[${index}]`, img.file!);
+      });
+
+      // Deleted images IDs
+      if (deletedGalleryIds.length > 0) {
+        formData.append('deleted_gallery_ids', JSON.stringify(deletedGalleryIds));
       }
 
-      const isFormData = !!editData.newImageFile;
+      formData.append('_method', 'PUT');
       
       const res = await fetchAPI(`/admin/pets/${id}`, {
-        method: isFormData ? 'POST' : 'PUT',
-        body,
-        headers
+        method: 'POST',
+        body: formData
       });
 
       if (res.success) {
@@ -125,7 +140,16 @@ export default function PetDetailPage() {
   };
 
   const handleCancel = () => {
-    // Reset editData to current pet values
+    // Re-initialize from saved data
+    if (pet.gallery) {
+      setGalleryItems(pet.gallery.map((img: any) => ({
+        id: img.id,
+        preview: getPetImageUrl(img.image_url),
+        isExisting: true
+      })));
+    }
+    setDeletedGalleryIds([]);
+
     setEditData({
       name: pet.name,
       species: pet.species,
@@ -149,6 +173,37 @@ export default function PetDetailPage() {
     setIsEditing(false);
   };
 
+  const handleGalleryAdd = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.accept = 'image/*';
+    input.onchange = (e: any) => {
+      const files = Array.from(e.target.files as FileList);
+      if (galleryItems.length + files.length > 4) {
+        toast.error('Bộ sưu tập chỉ cho phép tối đa 4 ảnh');
+        return;
+      }
+      const newItems = files.map(file => ({
+        file,
+        preview: URL.createObjectURL(file),
+        isExisting: false
+      }));
+      setGalleryItems(prev => [...prev, ...newItems]);
+    };
+    input.click();
+  };
+
+  const handleGalleryRemove = (index: number) => {
+    const item = galleryItems[index];
+    if (item.isExisting && item.id) {
+      setDeletedGalleryIds(prev => [...prev, item.id!]);
+    } else if (item.file) {
+      URL.revokeObjectURL(item.preview);
+    }
+    setGalleryItems(prev => prev.filter((_, i) => i !== index));
+  };
+
   if (loading) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
@@ -160,7 +215,28 @@ export default function PetDetailPage() {
   if (!pet) return null;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 max-w-7xl mx-auto space-y-6 relative">
+      {/* Lightbox Modal */}
+      {lightbox.isOpen && (
+        <div 
+          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-10 transition-all duration-500 animate-in fade-in"
+          onClick={() => setLightbox({ isOpen: false, image: null })}
+        >
+          <button 
+            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all"
+            onClick={() => setLightbox({ isOpen: false, image: null })}
+          >
+            <Plus className="w-6 h-6 rotate-45" />
+          </button>
+          <img 
+            src={lightbox.image!} 
+            alt="Zoomed" 
+            className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300" 
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
       {/* Navigation Bar */}
       <div className="flex items-center justify-between py-1 gap-4">
         <div className="flex items-center gap-2 text-[13px] font-menu whitespace-nowrap overflow-hidden">
@@ -217,7 +293,15 @@ export default function PetDetailPage() {
         </div>
 
         <div className="lg:col-span-1">
-          <PetProfileGallery pet={pet} refreshData={fetchPetData} isEditing={isEditing} />
+          <PetProfileGallery 
+             pet={pet} 
+             refreshData={fetchPetData} 
+             isEditing={isEditing} 
+             galleryItems={galleryItems}
+             onAdd={handleGalleryAdd}
+             onRemove={handleGalleryRemove}
+             onImageClick={(url) => setLightbox({ isOpen: true, image: url })}
+          />
         </div>
 
         {/* Row 2: Medical & Stats - Same Height */}
