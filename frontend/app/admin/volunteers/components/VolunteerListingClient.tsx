@@ -28,6 +28,7 @@ export default function VolunteerListingClient({ initialData, stats: initialStat
   });
   const [stats, setStats] = useState(initialStats);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isSelectAllTotal, setIsSelectAllTotal] = useState(false);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   
@@ -49,16 +50,20 @@ export default function VolunteerListingClient({ initialData, stats: initialStat
   }, [initialData]);
 
   const handleSelectItem = (id: number) => {
-    setSelectedIds(prev => 
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
+    setSelectedIds((prev: number[]) => {
+      const isSelected = prev.includes(id);
+      if (isSelected && isSelectAllTotal) setIsSelectAllTotal(false);
+      return isSelected ? prev.filter(i => i !== id) : [...prev, id];
+    });
   };
 
   const handleSelectAll = (checked: boolean) => {
+    const pageIds = volunteers.map((v: any) => v.id);
     if (checked) {
-      setSelectedIds(volunteers.map((v: any) => v.id));
+      setSelectedIds((prev: number[]) => [...new Set([...prev, ...pageIds])]);
     } else {
-      setSelectedIds([]);
+      setSelectedIds((prev: number[]) => prev.filter(id => !pageIds.includes(id)));
+      setIsSelectAllTotal(false);
     }
   };
 
@@ -82,8 +87,8 @@ export default function VolunteerListingClient({ initialData, stats: initialStat
       if (res.success) {
         toast.success('Đã xóa hồ sơ tình nguyện viên thành công');
         // Immediate UI update
-        setVolunteers(prev => prev.filter((v: any) => v.id !== deleteModal.volunteerId));
-        setSelectedIds(prev => prev.filter(id => id !== deleteModal.volunteerId));
+        setVolunteers((prev: any[]) => prev.filter((v: any) => v.id !== deleteModal.volunteerId));
+        setSelectedIds((prev: number[]) => prev.filter(id => id !== deleteModal.volunteerId));
         setDeleteModal({ isOpen: false, volunteerId: null, isDeleting: false });
         // Refresh list
         router.refresh();
@@ -97,20 +102,28 @@ export default function VolunteerListingClient({ initialData, stats: initialStat
   };
 
   const confirmBulkDelete = async () => {
-    if (selectedIds.length === 0) return;
+    if (selectedIds.length === 0 && !isSelectAllTotal) return;
 
     setIsBulkDeleting(true);
     try {
       const res = await fetchAPI('/admin/volunteers/bulk-delete', {
         method: 'POST',
-        body: JSON.stringify({ ids: selectedIds }),
+        body: JSON.stringify({ 
+          ids: selectedIds,
+          delete_all: isSelectAllTotal 
+        }),
       });
 
       if (res.success) {
-        toast.success(res.message || `Đã xóa thành công ${selectedIds.length} hồ sơ`);
+        toast.success(res.message || `Đã xóa thành công ${isSelectAllTotal ? pagination.total : selectedIds.length} hồ sơ`);
         // Immediate UI update
-        setVolunteers(prev => prev.filter((v: any) => !selectedIds.includes(v.id)));
+        if (isSelectAllTotal) {
+          setVolunteers([]);
+        } else {
+          setVolunteers((prev: any[]) => prev.filter((v: any) => !selectedIds.includes(v.id)));
+        }
         setSelectedIds([]);
+        setIsSelectAllTotal(false);
         setShowBulkDeleteModal(false);
         // Refresh list
         router.refresh();
@@ -136,14 +149,6 @@ export default function VolunteerListingClient({ initialData, stats: initialStat
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {selectedIds.length > 0 && (
-            <button
-              onClick={() => setShowBulkDeleteModal(true)}
-              className="inline-flex items-center justify-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2.5 rounded-[10px] font-menu text-[13.5px] transition-all shadow-sm active:scale-95"
-            >
-              <Trash2 className="w-4 h-4 stroke-[2.5]" /> Xóa {selectedIds.length} hồ sơ đã chọn
-            </button>
-          )}
           <Link 
             href="/admin/volunteers/new" 
             className="inline-flex items-center justify-center gap-1.5 bg-[#f08c50] hover:bg-[#e07b40] text-white px-5 py-2.5 rounded-[10px] font-menu text-[13.5px] transition-all shadow-md active:scale-95 hover:scale-105 whitespace-nowrap"
@@ -160,13 +165,57 @@ export default function VolunteerListingClient({ initialData, stats: initialStat
       {/* Main Content Card */}
       <div className="bg-white rounded-[10px] shadow-sm border border-gray-100 flex flex-col mb-8 relative z-10">
         
-        {/* Filters Area */}
-        <div className="px-5">
-          <VolunteerFilters />
+        {/* Selection / Filters Area */}
+        <div className="px-5 border-b border-gray-50 bg-white relative z-[60]">
+          {selectedIds.length > 0 ? (
+            <div className="flex items-center justify-between py-4 animate-in fade-in slide-in-from-top-1 duration-300">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 bg-[#f08c50]/10 px-3 py-1.5 rounded-full border border-[#f08c50]/20">
+                  <span className="text-[13px] font-bold text-[#f08c50]">
+                    {isSelectAllTotal ? pagination.total : selectedIds.length} mục đã chọn
+                  </span>
+                </div>
+                
+                {volunteers.length > 0 && volunteers.every(v => selectedIds.includes(v.id)) && pagination.total > selectedIds.length && !isSelectAllTotal && (
+                  <button 
+                    onClick={() => setIsSelectAllTotal(true)}
+                    className="text-[12px] font-bold text-[#3A8D9D] hover:underline transition-all"
+                  >
+                    Chọn tất cả {pagination.total} ứng viên trong hệ thống
+                  </button>
+                )}
+                
+                {isSelectAllTotal && (
+                  <span className="text-[12px] font-medium text-gray-400 italic">
+                    Đã chọn toàn bộ danh sách
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setShowBulkDeleteModal(true)}
+                  className="flex items-center gap-1.5 px-4 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-[8px] text-[12px] font-bold transition-all border border-red-100 active:scale-95"
+                >
+                  <Trash2 size={14} />
+                  Xóa các mục này
+                </button>
+                <div className="h-4 w-[1px] bg-gray-200 mx-1" />
+                <button 
+                  onClick={() => { setSelectedIds([]); setIsSelectAllTotal(false); }}
+                  className="text-[12px] font-medium text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  Hủy bỏ
+                </button>
+              </div>
+            </div>
+          ) : (
+            <VolunteerFilters />
+          )}
         </div>
 
         {/* Table Area */}
-        <div className="flex-1 bg-white border-t border-gray-50">
+        <div className="flex-1 bg-white">
           <VolunteerTable 
             volunteers={volunteers} 
             selectedIds={selectedIds}

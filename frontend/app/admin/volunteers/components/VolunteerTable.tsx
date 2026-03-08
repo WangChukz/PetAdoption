@@ -39,6 +39,17 @@ export default function VolunteerTable({
   onSelectAll,
   onDeleteItem
 }: VolunteerTableProps) {
+  const isAllSelected = volunteers.length > 0 && volunteers.every(v => selectedIds.includes(v.id));
+  const isSomeSelected = volunteers.length > 0 && volunteers.some(v => selectedIds.includes(v.id)) && !isAllSelected;
+
+  const headerCheckboxRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (headerCheckboxRef.current) {
+      headerCheckboxRef.current.indeterminate = isSomeSelected;
+    }
+  }, [isSomeSelected]);
+
   return (
     <div className="flex flex-col">
       <div className="overflow-x-auto">
@@ -47,10 +58,11 @@ export default function VolunteerTable({
             <tr className="bg-[#3A8D9D] text-white font-vietnam text-[11px] font-black uppercase tracking-[0.15em] border-b border-white/10">
               <th className="px-5 py-4 w-[60px] text-center border-r border-white/10">
                 <input 
+                  ref={headerCheckboxRef}
                   type="checkbox" 
-                  checked={selectedIds.length === volunteers.length && volunteers.length > 0}
+                  checked={isAllSelected}
                   onChange={(e) => onSelectAll(e.target.checked)}
-                  className="rounded-[6px] border-none bg-white/20 text-white focus:ring-0 w-4.5 h-4.5 cursor-pointer shadow-inner transition-all hover:bg-white/30"
+                  className="rounded-[6px] border-none bg-white/20 text-white focus:ring-0 w-4.5 h-4.5 cursor-pointer shadow-inner transition-all hover:bg-white/30 accent-[#f08c50]"
                 />
               </th>
               <th className="px-6 py-4 w-[100px] border-r border-white/10">ID</th>
