@@ -16,16 +16,16 @@ class UploadHelper
     {
         if (config('filesystems.default') === 'cloudinary') {
             try {
-                // Use Facade for more stability and explicit control
-                $result = \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::upload(
-                    $file->getRealPath(), 
-                    ['folder' => $folder]
-                );
+                // Use Laravel Storage disk interface for cleaner abstraction
+                $disk = Storage::disk('cloudinary');
+                $path = $disk->put($folder, $file);
                 
-                if (!$result) {
-                    throw new \Exception("Cloudinary returned a null result.");
+                if (!$path) {
+                    throw new \Exception("Cloudinary returned a null result or empty path.");
                 }
-                return $result->getSecurePath();
+                
+                // Return the public URL
+                return $disk->url($path);
             } catch (\Exception $e) {
                 Log::error("Cloudinary Upload Failed: " . $e->getMessage(), [
                     'folder' => $folder,
@@ -34,7 +34,7 @@ class UploadHelper
                 ]);
                 
                 throw new UploadException(
-                    "Lỗi tải file lên Cloudinary: " . $e->getMessage() . " (File: " . $file->getClientOriginalName() . ")",
+                    "Lỗi tải file lên Cloudinary: " . $e->getMessage(),
                     ['folder' => $folder, 'service' => 'cloudinary'],
                     500
                 );
