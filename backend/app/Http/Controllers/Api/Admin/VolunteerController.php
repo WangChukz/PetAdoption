@@ -198,14 +198,21 @@ class VolunteerController extends Controller
     public function bulkDelete(Request $request): JsonResponse
     {
         $request->validate([
-            'ids' => 'required|array|min:1',
-            'ids.*' => 'integer'
+            'ids' => 'nullable|array',
+            'ids.*' => 'integer',
+            'delete_all' => 'nullable|boolean'
         ]);
 
-        $ids = $request->ids;
-        // Use withTrashed to also catch soft-deleted records, then force delete
-        $count = VolunteerApplication::withTrashed()->whereIn('id', $ids)->count();
-        VolunteerApplication::withTrashed()->whereIn('id', $ids)->forceDelete();
+        if ($request->delete_all) {
+            $count = VolunteerApplication::withTrashed()->count();
+            VolunteerApplication::withTrashed()->forceDelete();
+        } else {
+            $ids = $request->ids ?? [];
+            if (empty($ids)) return response()->json(['success' => false, 'message' => 'Không có ID nào được chọn.'], 400);
+            
+            $count = VolunteerApplication::withTrashed()->whereIn('id', $ids)->count();
+            VolunteerApplication::withTrashed()->whereIn('id', $ids)->forceDelete();
+        }
 
         return response()->json([
             'success' => true,
