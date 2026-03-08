@@ -349,11 +349,11 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
         ))}
       </div>
 
-      {/* Unified Card Container */}
-      <div className="bg-white rounded-[10px] shadow-sm border border-gray-100 flex flex-col mb-8">
+      {/* Unified Card Container - must allow overflow for dropdowns */}
+      <div className="bg-white rounded-[10px] shadow-sm border border-gray-100 flex flex-col mb-8 overflow-visible">
         
-        {/* Filter Section (Top Component) */}
-        <div className="px-5 py-3.5 border-b border-gray-50 bg-white relative z-50">
+        {/* Filter Section (Top Component) - higher z-index for dropdowns */}
+        <div className="px-5 py-3.5 border-b border-gray-50 bg-white relative z-[60]">
           <div className="flex flex-wrap items-center gap-3">
             {/* Main Filters */}
             <CustomDropdown 
@@ -449,8 +449,8 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
           </div>
         </div>
 
-        {/* Data Table Component */}
-        <div className="relative">
+        {/* Data Table Component - lower stacking context */}
+        <div className="relative z-0">
           {loading && (
             <div className="absolute inset-0 z-30 backdrop-blur-[2px] bg-white/40 flex items-center justify-center transition-all duration-500">
               <div className="flex flex-col items-center gap-2">
