@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { fetchAPI } from '@/lib/api';
 import VolunteerListingClient from './components/VolunteerListingClient';
 
@@ -57,9 +58,11 @@ export default async function AdminVolunteersPage({
   ]);
 
   return (
-    <VolunteerListingClient 
-      initialData={vPage} 
-      stats={stats} 
-    />
+    <Suspense fallback={<div className="p-8 text-center text-gray-500">Đang tải danh sách...</div>}>
+      <VolunteerListingClient 
+        initialData={vPage} 
+        stats={stats} 
+      />
+    </Suspense>
   );
 }
