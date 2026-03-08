@@ -397,34 +397,34 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
             {/* Date Filters Group */}
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-100 rounded-[10px] px-3 py-1.5 transition-all focus-within:border-[#3A8D9D] focus-within:bg-white group">
-                <span className="text-[9px] font-black text-gray-400 group-focus-within:text-[#3A8D9D] uppercase tracking-wider">Từ</span>
+                <span className="text-[10px] font-medium text-gray-400 group-focus-within:text-[#3A8D9D] uppercase tracking-wider">Từ</span>
                 <input 
                   type="date" 
                   value={filters.start_date}
                   onChange={(e) => handleFilterChange('start_date', e.target.value)}
-                  className="bg-transparent border-none text-[12px] font-bold text-gray-700 focus:ring-0 p-0 cursor-pointer w-[100px]"
+                  className="bg-transparent border-none text-[13px] font-medium text-gray-700 focus:ring-0 p-0 cursor-pointer w-[105px]"
                 />
               </div>
 
               <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-100 rounded-[10px] px-3 py-1.5 transition-all focus-within:border-[#3A8D9D] focus-within:bg-white group">
-                <span className="text-[9px] font-black text-gray-400 group-focus-within:text-[#3A8D9D] uppercase tracking-wider">Đến</span>
+                <span className="text-[10px] font-medium text-gray-400 group-focus-within:text-[#3A8D9D] uppercase tracking-wider">Đến</span>
                 <input 
                   type="date" 
                   value={filters.end_date}
                   onChange={(e) => handleFilterChange('end_date', e.target.value)}
-                  className="bg-transparent border-none text-[12px] font-bold text-gray-700 focus:ring-0 p-0 cursor-pointer w-[100px]"
+                  className="bg-transparent border-none text-[13px] font-medium text-gray-700 focus:ring-0 p-0 cursor-pointer w-[105px]"
                 />
               </div>
             </div>
 
             {/* Search Box - Compact */}
-            <div className="relative flex-1 min-w-[200px] max-w-[300px] group">
+            <div className="relative flex-1 min-w-[200px] max-w-[280px] group">
               <input 
                 type="text" 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Tìm tên thú cưng..."
-                className="w-full bg-gray-50/50 border border-gray-100 rounded-[10px] pl-9 pr-4 py-2 text-[13px] font-medium focus:outline-none focus:border-[#3A8D9D] focus:ring-4 focus:ring-[#3A8D9D]/5 transition-all outline-none" 
+                className="w-full bg-gray-50/50 border border-gray-100 rounded-[10px] pl-9 pr-4 py-2 text-[13px] font-normal focus:outline-none focus:border-[#3A8D9D] focus:ring-4 focus:ring-[#3A8D9D]/5 transition-all outline-none" 
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 group-focus-within:text-[#3A8D9D] transition-colors" />
             </div>
@@ -448,7 +448,7 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
                 title="Xóa tất cả bộ lọc"
               >
                 <FilterX className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
-                <span className="text-[11px] font-black uppercase tracking-wider">Xóa</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider">Xóa</span>
               </button>
             )}
 
