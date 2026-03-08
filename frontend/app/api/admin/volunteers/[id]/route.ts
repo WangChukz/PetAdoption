@@ -38,3 +38,38 @@ export async function PATCH(
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get('admin_token')?.value;
+
+    const res = await fetch(`${API_BASE}/admin/volunteers/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return NextResponse.json(
+        { success: false, message: data.message || data.error || 'Xóa thất bại.' },
+        { status: res.status }
+      );
+    }
+
+    return NextResponse.json(data);
+  } catch (error: any) {
+    console.error('[volunteer-delete] Error:', error.message);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
+}
+
