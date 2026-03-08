@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
 import CustomDropdown from '../../components/CustomDropdown';
+import CustomDateRangePicker from '../../components/CustomDateRangePicker';
 import { toast } from 'react-hot-toast';
 import { getPetImageUrl } from '@/lib/imageUtils';
 
@@ -394,28 +395,16 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
               className="w-[140px]"
             />
 
-            {/* Date Filters Group */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-100 rounded-[10px] px-3 py-1.5 transition-all focus-within:border-[#3A8D9D] focus-within:bg-white group">
-                <span className="text-[10px] font-medium text-gray-400 group-focus-within:text-[#3A8D9D] uppercase tracking-wider">Từ</span>
-                <input 
-                  type="date" 
-                  value={filters.start_date}
-                  onChange={(e) => handleFilterChange('start_date', e.target.value)}
-                  className="bg-transparent border-none text-[13px] font-medium text-gray-700 focus:ring-0 p-0 cursor-pointer w-[105px]"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-100 rounded-[10px] px-3 py-1.5 transition-all focus-within:border-[#3A8D9D] focus-within:bg-white group">
-                <span className="text-[10px] font-medium text-gray-400 group-focus-within:text-[#3A8D9D] uppercase tracking-wider">Đến</span>
-                <input 
-                  type="date" 
-                  value={filters.end_date}
-                  onChange={(e) => handleFilterChange('end_date', e.target.value)}
-                  className="bg-transparent border-none text-[13px] font-medium text-gray-700 focus:ring-0 p-0 cursor-pointer w-[105px]"
-                />
-              </div>
-            </div>
+            <CustomDateRangePicker 
+              startDate={filters.start_date}
+              endDate={filters.end_date}
+              onChange={(start, end) => {
+                const newFilters = { ...filters, start_date: start, end_date: end };
+                setFilters(newFilters);
+                fetchPets(1, search, newFilters);
+              }}
+              className="z-40"
+            />
 
             {/* Search Box - Compact */}
             <div className="relative flex-1 min-w-[200px] max-w-[280px] group">
