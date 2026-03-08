@@ -83,8 +83,11 @@ class UploadHelper
                         $publicId = substr($publicId, 2);
                     }
                     try {
-                        \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::destroy($publicId);
+                        cloudinary()->uploadApi()->destroy($publicId);
                     } catch (\Exception $e) {
+                        Log::warning("Cloudinary Delete Failed: " . $e->getMessage(), [
+                            'publicId' => $publicId,
+                        ]);
                         // Ignore deletion errors to prevent crashing
                     }
                 }
