@@ -55,6 +55,7 @@ Route::prefix('admin')
 
         // Volunteer Applications
         Route::get('/volunteers/stats', [\App\Http\Controllers\Api\Admin\VolunteerController::class, 'stats']);
+        Route::post('/volunteers/bulk-delete', [\App\Http\Controllers\Api\Admin\VolunteerController::class, 'bulkDelete']);
         Route::apiResource('volunteers', \App\Http\Controllers\Api\Admin\VolunteerController::class);
         Route::patch('/volunteers/{volunteer}/status', [\App\Http\Controllers\Api\Admin\VolunteerController::class, 'updateStatus']);
 

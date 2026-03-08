@@ -195,6 +195,23 @@ class VolunteerController extends Controller
         ], 201);
     }
 
+    public function bulkDelete(Request $request): JsonResponse
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:volunteer_applications,id'
+        ]);
+
+        $ids = $request->ids;
+        $count = VolunteerApplication::whereIn('id', $ids)->count();
+        VolunteerApplication::whereIn('id', $ids)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Đã xóa thành công $count hồ sơ tình nguyện viên."
+        ]);
+    }
+
     public function stats(): JsonResponse
     {
         $total = VolunteerApplication::count();
