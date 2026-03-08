@@ -250,7 +250,7 @@ export default function PetDetailPage() {
       {/* Lightbox Modal */}
       {lightbox.isOpen && currentLightboxImage && (
         <div 
-          className="fixed inset-0 z-[9999] bg-black/98 backdrop-blur-2xl flex items-center justify-center transition-all duration-500 animate-in fade-in"
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-xl flex items-center justify-center transition-all duration-500 animate-in fade-in"
           onClick={() => setLightbox(prev => ({ ...prev, isOpen: false }))}
         >
           {/* Controls Overlay */}
