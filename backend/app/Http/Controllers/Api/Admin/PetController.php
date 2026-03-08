@@ -188,6 +188,29 @@ class PetController extends Controller
         }
         unset($validated['image']);
 
+        // Handle gallery deletions
+        if ($request->has('deleted_gallery_ids')) {
+            $deletedIds = json_decode($request->deleted_gallery_ids, true);
+            if (is_array($deletedIds)) {
+                $imagesToDelete = \App\Models\PetImage::whereIn('id', $deletedIds)->where('pet_id', $pet->id)->get();
+                foreach ($imagesToDelete as $img) {
+                    if ($img->image_url) \App\Helpers\UploadHelper::delete($img->image_url);
+                    $img->delete();
+                }
+            }
+        }
+
+        // Handle new gallery uploads
+        if ($request->hasFile('gallery')) {
+            foreach ($request->file('gallery') as $file) {
+                $url = \App\Helpers\UploadHelper::upload($file, 'pets/gallery');
+                $pet->gallery()->create([
+                    'image_url' => $url,
+                    'sort_order' => $pet->gallery()->count()
+                ]);
+            }
+        }
+
         // Separate Profile fields from Pet fields
         $profileFields = [
             'is_vaccinated', 'is_neutered', 'medical_history', 'status',
@@ -224,7 +247,7 @@ class PetController extends Controller
             $pet->petProfile->update($profileUpdate);
         }
 
-        return response()->json(['success' => true, 'data' => $pet->load('petProfile')]);
+        return response()->json(['success' => true, 'data' => $pet->load(['petProfile', 'gallery'])]);
     }
 
     public function show(Pet $pet): JsonResponse
