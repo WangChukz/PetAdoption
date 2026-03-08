@@ -153,7 +153,7 @@ class VolunteerController extends Controller
 
     public function destroy(VolunteerApplication $volunteer): JsonResponse
     {
-        $volunteer->delete();
+        $volunteer->forceDelete();
         return response()->json(['success' => true]);
     }
 
@@ -198,13 +198,14 @@ class VolunteerController extends Controller
     public function bulkDelete(Request $request): JsonResponse
     {
         $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:volunteer_applications,id'
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer'
         ]);
 
         $ids = $request->ids;
-        $count = VolunteerApplication::whereIn('id', $ids)->count();
-        VolunteerApplication::whereIn('id', $ids)->delete();
+        // Use withTrashed to also catch soft-deleted records, then force delete
+        $count = VolunteerApplication::withTrashed()->whereIn('id', $ids)->count();
+        VolunteerApplication::withTrashed()->whereIn('id', $ids)->forceDelete();
 
         return response()->json([
             'success' => true,
