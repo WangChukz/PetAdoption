@@ -76,10 +76,18 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
     breed: '',
   });
 
+  // Selection State
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
   // Modal State
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
     petId: null as number | null,
+    isDeleting: false
+  });
+
+  const [bulkDeleteModal, setBulkDeleteModal] = useState({
+    isOpen: false,
     isDeleting: false
   });
 
@@ -122,6 +130,8 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
         last_page: data.last_page || 1,
         total: data.total || 0,
       });
+      // Clear selection when page changes
+      setSelectedIds([]);
     } catch (err) {
       console.error('Fetch error:', err);
     } finally {
@@ -180,6 +190,20 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
     fetchPets(1, search, newFilters);
   };
 
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(pets.map((p) => p.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectItem = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
   const handleDelete = (id: number) => {
     setDeleteModal({
       isOpen: true,
@@ -205,6 +229,7 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
       
       toast.success('Đã xóa hồ sơ thú cưng thành công');
       setPets(prev => prev.filter(p => p.id !== deleteModal.petId));
+      setSelectedIds(prev => prev.filter(i => i !== deleteModal.petId));
       setDeleteModal({ isOpen: false, petId: null, isDeleting: false });
       
       // Refresh list to update totals if needed
@@ -217,6 +242,38 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
     }
   };
 
+  const confirmBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+
+    setBulkDeleteModal((prev) => ({ ...prev, isDeleting: true }));
+    try {
+      const res = await fetch(`/api/admin/pets/bulk-delete`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+
+      if (!res.ok) throw new Error('Failed to delete pets');
+
+      const json = await res.json();
+      toast.success(json.message || `Đã xóa thành công ${selectedIds.length} thú cưng`);
+      
+      setBulkDeleteModal({ isOpen: false, isDeleting: false });
+      setSelectedIds([]);
+      
+      // Refresh list
+      fetchPets(pagination.current_page, search);
+      fetchDashboardStats();
+    } catch (err) {
+      console.error(err);
+      toast.error('Có lỗi xảy ra khi xóa hàng loạt');
+      setBulkDeleteModal((prev) => ({ ...prev, isDeleting: false }));
+    }
+  };
+
   return (
     <div className="flex flex-col">
       {/* Header Section */}
@@ -225,10 +282,20 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
           <h1 className="font-menu font-black text-[#101828] text-[20px] tracking-tight leading-none mb-1">Danh Sách Thú Cưng</h1>
           <p className="font-menu text-gray-400 text-[13px] font-medium transition-colors hover:text-gray-500">Quản lý <span className="text-[#3A8D9D] font-black">{pagination.total}</span> thú cưng trong hệ thống</p>
         </div>
-        <NextLink href="/admin/pets/new"
-          className="inline-flex items-center justify-center gap-1.5 bg-[#f08c50] hover:bg-[#e07b40] text-white px-5 py-2.5 rounded-[10px] font-menu text-[13.5px] transition-all shadow-md active:scale-95 hover:scale-105">
-          <Plus className="w-4 h-4 stroke-[4]" /> Thêm Thú Cưng Mới
-        </NextLink>
+        <div className="flex items-center gap-3">
+          {selectedIds.length > 0 && (
+            <button
+              onClick={() => setBulkDeleteModal({ isOpen: true, isDeleting: false })}
+              className="inline-flex items-center justify-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2.5 rounded-[10px] font-menu text-[13.5px] transition-all shadow-sm active:scale-95"
+            >
+              <Trash2 className="w-4 h-4 stroke-[2.5]" /> Xóa {selectedIds.length} mục đã chọn
+            </button>
+          )}
+          <NextLink href="/admin/pets/new"
+            className="inline-flex items-center justify-center gap-1.5 bg-[#f08c50] hover:bg-[#e07b40] text-white px-5 py-2.5 rounded-[10px] font-menu text-[13.5px] transition-all shadow-md active:scale-95 hover:scale-105">
+            <Plus className="w-4 h-4 stroke-[4]" /> Thêm Thú Cưng Mới
+          </NextLink>
+        </div>
       </div>
 
       {/* Stats Cards Row */}
@@ -263,8 +330,8 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
              <div className="relative z-10">
                <p className="font-menu text-[12px] font-bold text-[#64748b] uppercase tracking-wide mb-3">{stat.label}</p>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-menu text-[42px] font-bold text-[#111827] leading-none tracking-tight">{stat.value}</h3>
-                  {stat.trend && (
+                   <h3 className="font-menu text-[42px] font-bold text-[#111827] leading-none tracking-tight">{stat.value}</h3>
+                   {stat.trend && (
                     <span className={`${stat.trendColor} py-1 px-2.5 rounded-[8px] flex items-center gap-1 mt-1`}>
                       <TrendingUp size={14} className="stroke-[3]" />
                       <span className="text-[14px] font-bold">{stat.trend}</span>
@@ -372,7 +439,12 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
               <thead>
                 <tr className="bg-[#3A8D9D] text-white font-menu text-[11px] font-black uppercase tracking-[0.15em] border-b border-white/10">
                   <th className="px-5 py-4 w-[60px] text-center">
-                    <input type="checkbox" className="rounded-[10px] border-none bg-white/20 text-white focus:ring-0 w-4.5 h-4.5 cursor-pointer shadow-inner transition-all hover:bg-white/30" />
+                    <input 
+                      type="checkbox" 
+                      onChange={handleSelectAll}
+                      checked={pets.length > 0 && selectedIds.length === pets.length}
+                      className="rounded-[10px] border-none bg-white/20 text-white focus:ring-0 w-4.5 h-4.5 cursor-pointer shadow-inner transition-all hover:bg-white/30" 
+                    />
                   </th>
                   <th className="px-4 py-4 border-r border-white/10">THÚ CƯNG</th>
                   <th className="px-4 py-4 border-r border-white/10">CHI TIẾT</th>
@@ -386,9 +458,14 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
                   <tr><td colSpan={6} className="text-center py-20 text-gray-400 italic font-medium">Không có dữ liệu hiển thị.</td></tr>
                 ) : (
                   pets.map((pet) => (
-                    <tr key={pet.id} className="hover:bg-gray-50 transition-all group duration-300">
+                    <tr key={pet.id} className={`hover:bg-gray-50 transition-all group duration-300 ${selectedIds.includes(pet.id) ? 'bg-blue-50/30' : ''}`}>
                       <td className="px-5 py-4 text-center border-r border-gray-50/50">
-                         <input type="checkbox" className="rounded-[10px] border-gray-300 text-[#f08c50] focus:ring-[#f08c50]/20 w-4.5 h-4.5 cursor-pointer transition-all" />
+                         <input 
+                          type="checkbox" 
+                          checked={selectedIds.includes(pet.id)}
+                          onChange={() => handleSelectItem(pet.id)}
+                          className="rounded-[10px] border-gray-300 text-[#f08c50] focus:ring-[#f08c50]/20 w-4.5 h-4.5 cursor-pointer transition-all" 
+                        />
                       </td>
                       <td className="px-4 py-4 border-r border-gray-50/50 whitespace-nowrap">
                         <div className="flex items-center gap-3">
@@ -515,6 +592,18 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
         cancelText="Để mình xem lại"
         type="danger"
         isLoading={deleteModal.isDeleting}
+      />
+
+      <ConfirmModal
+        isOpen={bulkDeleteModal.isOpen}
+        onClose={() => setBulkDeleteModal({ isOpen: false, isDeleting: false })}
+        onConfirm={confirmBulkDelete}
+        title="Xác nhận xóa hàng loạt"
+        message={`Bạn có chắc chắn muốn xóa ${selectedIds.length} thú cưng đã chọn không? Toàn bộ hồ sơ và hình ảnh liên quan sẽ bị xóa vĩnh viễn.`}
+        confirmText={`Xóa ${selectedIds.length} mục`}
+        cancelText="Để mình xem lại"
+        type="danger"
+        isLoading={bulkDeleteModal.isDeleting}
       />
     </div>
   );
