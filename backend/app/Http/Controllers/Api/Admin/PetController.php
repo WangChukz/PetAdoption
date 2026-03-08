@@ -57,6 +57,16 @@ class PetController extends Controller
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
+        if ($request->filled('start_date')) {
+            $query->whereHas('petProfile', function($q) use ($request) {
+                $q->whereDate('intake_date', '>=', $request->start_date);
+            });
+        }
+        if ($request->filled('end_date')) {
+            $query->whereHas('petProfile', function($q) use ($request) {
+                $q->whereDate('intake_date', '<=', $request->end_date);
+            });
+        }
 
         $pets = $query->orderByDesc('created_at')->paginate($request->get('per_page', 15));
 

@@ -74,6 +74,8 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
     status: '',
     gender: '',
     breed: '',
+    start_date: '',
+    end_date: '',
   });
 
   // Selection State
@@ -115,6 +117,8 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
         status: currentFilters.status,
         gender: currentFilters.gender,
         breed: currentFilters.breed,
+        start_date: currentFilters.start_date,
+        end_date: currentFilters.end_date,
       });
 
       const res = await fetch(`/api/admin/pets?${query.toString()}`);
@@ -391,15 +395,43 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
                 className="w-[170px]"
               />
 
-              {(filters.status || filters.species || filters.breed) && (
+              <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-100 rounded-[10px] px-3 py-1.5 transition-all focus-within:border-[#3A8D9D] focus-within:bg-white">
+                <span className="text-[10px] font-black text-[#3A8D9D] uppercase tracking-wider">Từ</span>
+                <input 
+                  type="date" 
+                  value={filters.start_date}
+                  onChange={(e) => handleFilterChange('start_date', e.target.value)}
+                  className="bg-transparent border-none text-[13px] font-bold text-gray-700 focus:ring-0 p-0 cursor-pointer"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-100 rounded-[10px] px-3 py-1.5 transition-all focus-within:border-[#3A8D9D] focus-within:bg-white">
+                <span className="text-[10px] font-black text-[#3A8D9D] uppercase tracking-wider">Đến</span>
+                <input 
+                  type="date" 
+                  value={filters.end_date}
+                  onChange={(e) => handleFilterChange('end_date', e.target.value)}
+                  className="bg-transparent border-none text-[13px] font-bold text-gray-700 focus:ring-0 p-0 cursor-pointer"
+                />
+              </div>
+
+              {(filters.status || filters.species || filters.breed || filters.start_date || filters.end_date) && (
                 <button 
                   onClick={() => {
-                    const reset = { status: '', species: '', gender: '', breed: '' };
+                    const reset = { 
+                      status: '', 
+                      species: '', 
+                      gender: '', 
+                      breed: '', 
+                      start_date: '', 
+                      end_date: '' 
+                    };
                     setFilters(reset);
                     fetchPets(1, search, reset);
                   }}
-                  className="text-[12px] font-bold text-gray-400 hover:text-red-500 px-2 transition-colors uppercase tracking-tight"
+                  className="text-[11px] font-black text-gray-400 hover:text-red-500 px-2 transition-colors uppercase tracking-widest flex items-center gap-1.5 group"
                 >
+                  <FilterX className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
                   Xóa lọc
                 </button>
               )}
