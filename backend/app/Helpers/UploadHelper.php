@@ -16,7 +16,12 @@ class UploadHelper
     {
         if (config('filesystems.default') === 'cloudinary') {
             try {
-                $result = $file->storeOnCloudinary($folder);
+                // Use Facade for more stability and explicit control
+                $result = \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::upload(
+                    $file->getRealPath(), 
+                    ['folder' => $folder]
+                );
+                
                 if (!$result) {
                     throw new \Exception("Cloudinary returned a null result.");
                 }
@@ -25,10 +30,11 @@ class UploadHelper
                 Log::error("Cloudinary Upload Failed: " . $e->getMessage(), [
                     'folder' => $folder,
                     'file'   => $file->getClientOriginalName(),
+                    'trace'  => $e->getTraceAsString()
                 ]);
                 
                 throw new UploadException(
-                    "Lỗi tải file lên Cloudinary: " . $e->getMessage(),
+                    "Lỗi tải file lên Cloudinary: " . $e->getMessage() . " (File: " . $file->getClientOriginalName() . ")",
                     ['folder' => $folder, 'service' => 'cloudinary'],
                     500
                 );
