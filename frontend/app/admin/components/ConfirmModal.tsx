@@ -99,7 +99,7 @@ export default function ConfirmModal({
             <button
               onClick={onConfirm}
               disabled={isLoading}
-              className="px-6 py-2.5 rounded-[8px] font-menu font-medium text-[13px] md:text-[13.5px] text-white bg-[#f08c50] hover:bg-[#e07b40] transition-all active:scale-95 disabled:opacity-50 shadow-sm whitespace-nowrap min-w-[120px]"
+              className={`px-6 py-2.5 rounded-[8px] font-menu font-medium text-[13px] md:text-[13.5px] text-white transition-all active:scale-95 disabled:opacity-50 shadow-sm whitespace-nowrap min-w-[120px] ${typeConfig[type].button}`}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">

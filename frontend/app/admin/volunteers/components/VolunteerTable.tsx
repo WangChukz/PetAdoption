@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { CheckCircle2, PartyPopper, Clock3, XCircle, CalendarCheck2, Mic2, Trash2, User } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { CheckCircle2, PartyPopper, Clock3, XCircle, CalendarCheck2, Mic2, Trash2, User, Eye } from 'lucide-react';
 
 type Volunteer = {
   id: number;
@@ -25,56 +24,23 @@ const statusMap: Record<string, { label: string; color: string; icon: any }> = {
   interviewing: { label: 'ĐANG PV', color: 'bg-indigo-50 text-indigo-600 border-indigo-100', icon: Mic2 },
 };
 
-export default function VolunteerTable({ volunteers }: { volunteers: Volunteer[] }) {
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+interface VolunteerTableProps {
+  volunteers: Volunteer[];
+  selectedIds: number[];
+  onSelectItem: (id: number) => void;
+  onSelectAll: (checked: boolean) => void;
+  onDeleteItem: (id: number) => void;
+}
 
-  const toggleSelectAll = () => {
-    if (selectedIds.length === volunteers.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(volunteers.map(v => v.id));
-    }
-  };
-
-  const toggleSelect = (id: number) => {
-    setSelectedIds(prev => 
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
-  };
-
-  const handleDeleteBulk = () => {
-    if (confirm(`Bạn có chắc chắn muốn xóa ${selectedIds.length} hồ sơ đã chọn?`)) {
-      toast.success(`Đã xóa thành công ${selectedIds.length} hồ sơ!`, {
-        className: 'admin-toast',
-        duration: 4000
-      });
-      setSelectedIds([]);
-    }
-  };
-
+export default function VolunteerTable({ 
+  volunteers, 
+  selectedIds, 
+  onSelectItem, 
+  onSelectAll,
+  onDeleteItem
+}: VolunteerTableProps) {
   return (
     <div className="flex flex-col">
-      {/* Bulk Actions Toolbar */}
-      {selectedIds.length > 0 && (
-        <div className="px-6 py-2.5 bg-[#f8fafc] border-y border-gray-100 flex items-center justify-between animate-in slide-in-from-top-2 duration-300">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
-              <span className="text-[12px] font-black text-[#3A8D9D]">{selectedIds.length}</span>
-            </div>
-            <p className="text-[13px] font-bold text-slate-600">
-              Hồ sơ đang được chọn để thao tác hàng loạt
-            </p>
-          </div>
-          <button 
-            onClick={handleDeleteBulk}
-            className="flex items-center gap-2 px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-[10px] text-[13px] font-black transition-all active:scale-95 border border-rose-100/50"
-          >
-            <Trash2 className="w-4 h-4 stroke-[2.5]" />
-            Xóa Mục Đã Chọn
-          </button>
-        </div>
-      )}
-
       <div className="overflow-x-auto">
         <table className="w-full text-left min-w-[1024px] border-separate border-spacing-y-0">
           <thead>
@@ -83,7 +49,7 @@ export default function VolunteerTable({ volunteers }: { volunteers: Volunteer[]
                 <input 
                   type="checkbox" 
                   checked={selectedIds.length === volunteers.length && volunteers.length > 0}
-                  onChange={toggleSelectAll}
+                  onChange={(e) => onSelectAll(e.target.checked)}
                   className="rounded-[6px] border-none bg-white/20 text-white focus:ring-0 w-4.5 h-4.5 cursor-pointer shadow-inner transition-all hover:bg-white/30"
                 />
               </th>
@@ -107,7 +73,7 @@ export default function VolunteerTable({ volunteers }: { volunteers: Volunteer[]
                     <input 
                       type="checkbox" 
                       checked={isSelected}
-                      onChange={() => toggleSelect(v.id)}
+                      onChange={() => onSelectItem(v.id)}
                       className="rounded-[6px] border-gray-300 text-[#f08c50] focus:ring-[#f08c50]/20 w-4.5 h-4.5 cursor-pointer transition-all"
                     />
                   </td>
@@ -156,12 +122,22 @@ export default function VolunteerTable({ volunteers }: { volunteers: Volunteer[]
                     </div>
                   </td>
                   <td className="px-6 py-6 whitespace-nowrap text-center">
-                    <Link 
-                      href={`/admin/volunteers/${v.id}`}
-                      className="inline-flex items-center justify-center px-5 py-2.5 bg-gray-50 hover:bg-gray-100 text-[#101828] text-[13px] font-black rounded-[10px] transition-all active:scale-95 border border-transparent hover:border-gray-200"
-                    >
-                      Xét Duyệt CV
-                    </Link>
+                    <div className="flex items-center justify-center gap-2">
+                      <Link 
+                        href={`/admin/volunteers/${v.id}`}
+                        className="p-2 text-[#3A8D9D] hover:bg-gray-100/80 rounded-[10px] transition-all border border-transparent hover:border-gray-100"
+                        title="Xét Duyệt CV"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </Link>
+                      <button 
+                        onClick={() => onDeleteItem(v.id)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-[10px] transition-all border border-transparent hover:border-red-100/30"
+                        title="Xóa hồ sơ"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
