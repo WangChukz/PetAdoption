@@ -16,11 +16,21 @@ interface VolunteerListingClientProps {
   stats: any;
 }
 
+type Volunteer = {
+  id: number;
+  name: string;
+  email: string;
+  position: string;
+  status: string;
+  created_at: string;
+  [key: string]: any;
+};
+
 export default function VolunteerListingClient({ initialData, stats: initialStats }: VolunteerListingClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [volunteers, setVolunteers] = useState(initialData.data);
+  const [volunteers, setVolunteers] = useState<Volunteer[]>(initialData.data);
   const [pagination, setPagination] = useState({
     current_page: initialData.current_page,
     last_page: initialData.last_page,
@@ -58,7 +68,7 @@ export default function VolunteerListingClient({ initialData, stats: initialStat
   };
 
   const handleSelectAll = (checked: boolean) => {
-    const pageIds = volunteers.map((v: any) => v.id);
+    const pageIds = volunteers.map(v => v.id);
     if (checked) {
       setSelectedIds((prev: number[]) => [...new Set([...prev, ...pageIds])]);
     } else {
@@ -87,7 +97,7 @@ export default function VolunteerListingClient({ initialData, stats: initialStat
       if (res.success) {
         toast.success('Đã xóa hồ sơ tình nguyện viên thành công');
         // Immediate UI update
-        setVolunteers((prev: any[]) => prev.filter((v: any) => v.id !== deleteModal.volunteerId));
+        setVolunteers(prev => prev.filter(v => v.id !== deleteModal.volunteerId));
         setSelectedIds((prev: number[]) => prev.filter(id => id !== deleteModal.volunteerId));
         setDeleteModal({ isOpen: false, volunteerId: null, isDeleting: false });
         // Refresh list
@@ -120,7 +130,7 @@ export default function VolunteerListingClient({ initialData, stats: initialStat
         if (isSelectAllTotal) {
           setVolunteers([]);
         } else {
-          setVolunteers((prev: any[]) => prev.filter((v: any) => !selectedIds.includes(v.id)));
+          setVolunteers(prev => prev.filter(v => !selectedIds.includes(v.id)));
         }
         setSelectedIds([]);
         setIsSelectAllTotal(false);
@@ -176,7 +186,7 @@ export default function VolunteerListingClient({ initialData, stats: initialStat
                   </span>
                 </div>
                 
-                {volunteers.length > 0 && volunteers.every(v => selectedIds.includes(v.id)) && pagination.total > selectedIds.length && !isSelectAllTotal && (
+                {volunteers.length > 0 && volunteers.every((v: Volunteer) => selectedIds.includes(v.id)) && pagination.total > selectedIds.length && !isSelectAllTotal && (
                   <button 
                     onClick={() => setIsSelectAllTotal(true)}
                     className="text-[12px] font-bold text-[#3A8D9D] hover:underline transition-all"
