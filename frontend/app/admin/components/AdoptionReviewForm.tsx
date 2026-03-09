@@ -8,7 +8,7 @@ import ConfirmModal from './ConfirmModal';
 
 type Application = {
   id: number;
-  status: 'pending' | 'interviewing' | 'approved' | 'rejected';
+  status: 'pending' | 'auto_rejected' | 'manual_check' | 'interviewing' | 'approved' | 'rejected' | 'complete';
   admin_notes: string | null;
   applicant_message: string | null;
   interviewed_at: string | null;
@@ -34,16 +34,26 @@ export default function AdoptionReviewForm({ data }: { data: Application }) {
     if (e) e.preventDefault();
 
     // --- Confirmation Modal Trigger ---
-    if (!showConfirm && (status === 'approved' || status === 'rejected')) {
-        const label = status === 'approved' ? 'Đã Phê Duyệt' : 'Từ Chối';
-        
-        setConfirmConfig({
-            title: status === 'approved' ? 'Xác nhận phê duyệt đơn?' : 'Xác nhận từ chối đơn?',
-            message: status === 'approved' 
-                ? `Bạn đang chuyển đơn nhận nuôi này sang trạng thái "Đã Phê Duyệt". Bạn có chắc chắn muốn tiếp tục?`
-                : `Bạn đang chọn "Từ Chối" đơn nhận nuôi này. Bạn có chắc chắn muốn tiếp tục?`,
-            type: status === 'approved' ? 'warning' : 'danger'
-        });
+    if (!showConfirm && (status === 'approved' || status === 'rejected' || status === 'complete')) {
+        let title = '';
+        let message = '';
+        let type: 'warning' | 'danger' = 'warning';
+
+        if (status === 'approved') {
+            title = 'Xác nhận phê duyệt đơn?';
+            message = 'Bạn đang chuyển đơn nhận nuôi này sang trạng thái "Đã Phê Duyệt". Thú cưng sẽ tạm thời ngừng nhận người nhận nuôi mới. Bạn có chắc chắn muốn tiếp tục?';
+            type = 'warning';
+        } else if (status === 'rejected') {
+            title = 'Xác nhận từ chối đơn?';
+            message = 'Bạn đang chọn "Từ Chối" đơn nhận nuôi này. Bạn có chắc chắn muốn tiếp tục?';
+            type = 'danger';
+        } else if (status === 'complete') {
+            title = 'Hoàn thành nhận nuôi?';
+            message = 'Bạn đang chuyển trạng thái thành "Hoàn Thành". Thú cưng sẽ chính thức cập nhật trạng thái đã có chủ. Hành động này không thể hoàn tác.';
+            type = 'warning';
+        }
+
+        setConfirmConfig({ title, message, type });
         setShowConfirm(true);
         return;
     }
@@ -90,10 +100,13 @@ export default function AdoptionReviewForm({ data }: { data: Application }) {
           <div className="relative">
             <select value={status} onChange={(e: any) => setStatus(e.target.value)}
               className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 pr-10 py-2.5 text-[14px] font-menu focus:ring-2 focus:ring-[#f08c50]/20 focus:border-[#f08c50] focus:bg-white transition appearance-none cursor-pointer">
-              <option value="pending">Chờ Duyệt Mới</option>
+              <option value="pending" disabled>Chờ Duyệt Mới</option>
+              <option value="auto_rejected" disabled>Từ Chối Tự Động (Hệ thống)</option>
+              <option value="manual_check">Sàng Lọc Thủ Công</option>
               <option value="interviewing">Đang Phỏng Vấn</option>
-              <option value="approved">Đã Phê Duyệt</option>
+              <option value="approved">Đã Phê Duyệt (Chờ Ký Hợp Đồng)</option>
               <option value="rejected">Từ Chối</option>
+              <option value="complete">Hoàn Thành Nhận Nuôi</option>
             </select>
             <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>

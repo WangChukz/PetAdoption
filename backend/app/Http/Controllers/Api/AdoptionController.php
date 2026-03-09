@@ -28,20 +28,42 @@ class AdoptionController extends Controller
             $application = AdoptionApplication::create([
                 'user_id' => $request->user_id,
                 'pet_id' => $request->pet_id,
-                'status' => 'pending',
+                'status' => 'pending', // HĐ2: Tạo hồ sơ với trạng thái Pending
             ]);
-            DB::commit();
 
-            // Notify Admins
-            $admins = User::whereIn('role', ['super_admin', 'moderator', 'staff'])->get();
-            foreach ($admins as $admin) {
-                $admin->notify(new AdminNotification(
-                    'Đơn nhận nuôi mới',
-                    "Bạn có đơn nhận nuôi mới (ID: #{$application->id})",
-                    "/admin/adoptions",
-                    'adoption'
-                ));
+            // HĐ3: Kiểm tra tính hợp lệ (Auto Check)
+            // Rule: Người nhận nuôi không thể tạo thêm đơn nếu đã có đơn đang xử lý cho cùng 1 thú cưng
+            $existingActiveApp = AdoptionApplication::where('user_id', $request->user_id)
+                ->where('pet_id', $request->pet_id)
+                ->whereIn('status', ['pending', 'manual_check', 'interviewing', 'approved'])
+                ->where('id', '!=', $application->id)
+                ->first();
+
+            if ($existingActiveApp) {
+                // Không hợp lệ -> AutoRejected
+                $application->update([
+                    'status' => 'auto_rejected',
+                    'notes'  => 'Hệ thống từ chối tự động: Bạn đã có một đơn xin nhận nuôi đang được xử lý cho thú cưng này.',
+                ]);
+            } else {
+                // Hợp lệ -> ManualCheck
+                $application->update([
+                    'status' => 'manual_check',
+                ]);
+
+                // Notify Admins
+                $admins = User::whereIn('role', ['super_admin', 'moderator', 'staff'])->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new AdminNotification(
+                        'Đơn nhận nuôi mới cần sàng lọc',
+                        "Bạn có đơn nhận nuôi mới (ID: #{$application->id}) cần sàng lọc thủ công",
+                        "/admin/adoptions",
+                        'adoption'
+                    ));
+                }
             }
+
+            DB::commit();
 
             return response()->json($application, 201);
         } catch (\Exception $e) {

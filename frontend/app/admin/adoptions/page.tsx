@@ -6,7 +6,7 @@ type AdoptionApplication = {
   id: number;
   user: { name: string; email: string };
   pet: { name: string; species: string; image_url: string | null };
-  status: 'pending' | 'approved' | 'rejected' | 'interviewing';
+  status: 'pending' | 'auto_rejected' | 'manual_check' | 'interviewing' | 'approved' | 'rejected' | 'complete';
   applicant_message: string | null;
   admin_notes: string | null;
   created_at: string;
@@ -20,10 +20,13 @@ type PaginatedAdoptions = {
 };
 
 const statusMap = {
-  pending:      { label: 'Chờ Duyệt',     color: 'bg-yellow-100 text-yellow-700' },
-  interviewing: { label: 'Đang Phỏng Vấn', color: 'bg-blue-100 text-blue-700' },
-  approved:     { label: 'Đã Duyệt',      color: 'bg-green-100 text-green-700' },
-  rejected:     { label: 'Từ Chối',       color: 'bg-red-100 text-red-700' },
+  pending:       { label: 'Chờ Duyệt Mới',   color: 'bg-yellow-100 text-yellow-700' },
+  auto_rejected: { label: 'Từ Chối Tự Động', color: 'bg-gray-100 text-gray-700' },
+  manual_check:  { label: 'Sàng Lọc Thủ Công', color: 'bg-purple-100 text-purple-700' },
+  interviewing:  { label: 'Đang Phỏng Vấn',  color: 'bg-blue-100 text-blue-700' },
+  approved:      { label: 'Đã Duyệt',        color: 'bg-green-100 text-green-700' },
+  rejected:      { label: 'Từ Chối',         color: 'bg-red-100 text-red-700' },
+  complete:      { label: 'Hoàn Thành',      color: 'bg-[#3A8D9D]/10 text-[#3A8D9D]' },
 };
 
 async function getAdoptions(page = 1, status = ''): Promise<PaginatedAdoptions> {
@@ -58,10 +61,12 @@ export default async function AdminAdoptionsPage({
         
         {/* Filters */}
         <div className="p-4 border-b border-gray-100 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Link href="/admin/adoptions" className={`px-4 py-2 rounded-xl text-[13px] font-menu font-semibold transition ${!statusFilter ? 'bg-[#1a1a1a] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Tất Cả</Link>
             <Link href="/admin/adoptions?status=pending" className={`px-4 py-2 rounded-xl text-[13px] font-menu font-semibold transition ${statusFilter === 'pending' ? 'bg-[#1a1a1a] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Chờ Duyệt Mới</Link>
+            <Link href="/admin/adoptions?status=manual_check" className={`px-4 py-2 rounded-xl text-[13px] font-menu font-semibold transition ${statusFilter === 'manual_check' ? 'bg-[#1a1a1a] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Sàng Lọc Thủ Công</Link>
             <Link href="/admin/adoptions?status=interviewing" className={`px-4 py-2 rounded-xl text-[13px] font-menu font-semibold transition ${statusFilter === 'interviewing' ? 'bg-[#1a1a1a] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Đang Phỏng Vấn</Link>
+            <Link href="/admin/adoptions?status=approved" className={`px-4 py-2 rounded-xl text-[13px] font-menu font-semibold transition ${statusFilter === 'approved' ? 'bg-[#1a1a1a] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Đã Duyệt</Link>
           </div>
         </div>
 
