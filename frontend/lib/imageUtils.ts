@@ -11,7 +11,7 @@ export function getPetImageUrl(path: string | null | undefined): string {
   if (path.startsWith('http')) return path;
 
   // Use the storage URL from env, or default to localhost if not set
-  const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
+  const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://localhost:8000/storage';
   
   // Clean the path - sometimes it might start with /storage or /
   let cleanPath = path;

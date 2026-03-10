@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function PetFactsGrid() {
+export default function PetFactsGrid({ pet }: { pet: any }) {
   return (
     <section className="max-w-7xl mx-auto px-6 py-8">
       <div className="border-t border-gray-200 pt-10 pb-10 w-full max-w-[950px] mx-auto border-b border-dashed border-gray-300">
@@ -12,35 +12,35 @@ export default function PetFactsGrid() {
           {/* Column 1 items */}
           <div className="flex flex-row justify-between md:justify-start pb-4 border-b border-gray-100 italic">
             <span className="font-bold text-gray-800 w-[80px] not-italic">Breed</span>
-            <span className="text-gray-600 flex-1 md:ml-10">Husky</span>
+            <span className="text-gray-600 flex-1 md:ml-10">{pet?.breed || 'Husky'}</span>
           </div>
           {/* Column 2 items */}
           <div className="flex flex-row justify-between md:justify-start pb-4 border-b border-gray-100 italic md:border-none md:pb-0">
              <span className="font-bold text-gray-800 w-[80px] not-italic">Weight</span>
-             <span className="text-gray-600 flex-1 md:ml-10">30 lbs (13.6 KG)</span>
+             <span className="text-gray-600 flex-1 md:ml-10">{pet?.weight ? `${pet.weight} ${pet.weight_unit || 'lbs'}` : 'N/A'}</span>
           </div>
           
           <div className="flex flex-row justify-between md:justify-start pb-4 border-b border-gray-100 italic">
             <span className="font-bold text-gray-800 w-[80px] not-italic">Color</span>
-            <span className="text-gray-600 flex-1 md:ml-10">Brown with White</span>
+            <span className="text-gray-600 flex-1 md:ml-10">{pet?.color || 'N/A'}</span>
           </div>
           <div className="flex flex-row justify-between md:justify-start pb-4 border-b border-gray-100 italic md:border-none md:pb-0">
              <span className="font-bold text-gray-800 w-[80px] not-italic">Sex</span>
-             <span className="text-gray-600 flex-1 md:ml-10">Male</span>
+             <span className="text-gray-600 flex-1 md:ml-10 capitalize">{pet?.gender || 'N/A'}</span>
           </div>
 
           <div className="flex flex-row justify-between md:justify-start pb-4 border-b border-gray-100 italic">
             <span className="font-bold text-gray-800 w-[80px] not-italic">Age</span>
-            <span className="text-gray-600 flex-1 md:ml-10">Adult</span>
+            <span className="text-gray-600 flex-1 md:ml-10">{pet?.age ? `${pet.age} ${pet.age_unit || 'years'}` : 'N/A'}</span>
           </div>
           <div className="flex flex-row justify-between md:justify-start pb-4 border-b border-gray-100 italic md:border-none md:pb-0">
              <span className="font-bold text-gray-800 w-[80px] not-italic">Pet id</span>
-             <span className="text-gray-600 flex-1 md:ml-10">P0021</span>
+             <span className="text-gray-600 flex-1 md:ml-10">{pet?.id ? `P${String(pet.id).padStart(4, '0')}` : 'P0000'}</span>
           </div>
 
-          <div className="flex flex-row justify-between md:justify-start pb-4 italic lg:col-span-1">
+          <div className="flex flex-row justify-between md:justify-start pb-4 italic lg:col-span-1 border-b border-gray-100 md:border-none md:pb-0">
             <span className="font-bold text-gray-800 w-[80px] not-italic">Size</span>
-            <span className="text-gray-600 flex-1 md:ml-10">LBS Not Showed (Max LBS: 60-80 LBS)</span>
+            <span className="text-gray-600 flex-1 md:ml-10 capitalize">{pet?.size || 'Medium'}</span>
           </div>
         </div>
       </div>

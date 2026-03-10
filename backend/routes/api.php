@@ -18,6 +18,7 @@ Route::get('/volunteer/confirm-interview', [PublicVolunteerController::class, 'c
 
 Route::get('/user', fn(Request $request) => $request->user())->middleware('auth:sanctum');
 Route::get('/pets', [PetController::class, 'index']);
+Route::get('/pets/{id}', [PetController::class, 'show']);
 Route::post('/adoptions', [AdoptionController::class, 'store']);
 Route::get('/adoptions/{id}', [AdoptionController::class, 'show']);
 

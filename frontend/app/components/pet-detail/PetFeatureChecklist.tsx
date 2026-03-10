@@ -1,6 +1,6 @@
 import React from 'react';
 
-const traits = [
+const defaultTraits = [
   "Good with kids",
   "Shots Current",
   "Spayed/Neutered",
@@ -16,7 +16,10 @@ function CheckIcon() {
   );
 }
 
-export default function PetFeatureChecklist() {
+export default function PetFeatureChecklist({ pet }: { pet: any }) {
+  // Use DB traits if available, otherwise just mock defaults
+  const traits = (pet?.traits && Array.isArray(pet.traits)) ? pet.traits : defaultTraits;
+
   return (
     <section className="max-w-7xl mx-auto px-6 py-4">
       <div className="w-full max-w-[950px] mx-auto border-b border-dashed border-gray-300 pb-10">
@@ -25,7 +28,7 @@ export default function PetFeatureChecklist() {
         </h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 font-menu text-[14px]">
-           {traits.map((trait, index) => (
+           {traits.map((trait: string, index: number) => (
              <div key={index} className="flex items-start italic text-gray-600">
                <CheckIcon />
                {trait}
