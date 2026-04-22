@@ -253,15 +253,21 @@ export default function PetDetailPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [lightbox.isOpen, nextImage, prevImage]);
 
-  if (loading) {
+  if (loading || !pet) {
     return (
-      <div className="flex h-[80vh] items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#f08c50]" />
+      <div className="p-6 max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between py-1">
+          <div className="h-5 w-48 bg-gray-100/50 rounded-md animate-pulse"></div>
+          <div className="h-8 w-32 bg-gray-100/80 rounded-lg animate-pulse"></div>
+        </div>
+        <div className="w-full h-[200px] bg-gray-50 rounded-3xl animate-pulse"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 h-[400px] bg-gray-50 rounded-3xl animate-pulse"></div>
+          <div className="lg:col-span-1 h-[400px] bg-gray-50/50 rounded-3xl animate-pulse"></div>
+        </div>
       </div>
     );
   }
-
-  if (!pet) return null;
 
   const currentLightboxImage = galleryItems[lightbox.currentIndex]?.preview;
 
