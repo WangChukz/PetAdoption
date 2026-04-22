@@ -170,18 +170,23 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
     }
   }, []);
 
-  useEffect(() => {
-    fetchPets();
-    fetchDashboardStats();
-    fetchMetadata();
-  }, [fetchPets, fetchDashboardStats, fetchMetadata]);
+  const isMounted = React.useRef(false);
 
   useEffect(() => {
+    if (!isMounted.current) {
+      fetchPets(1, '');
+      fetchDashboardStats();
+      fetchMetadata();
+      isMounted.current = true;
+      return;
+    }
+
     const timer = setTimeout(() => {
-      fetchPets(1, search);
+      fetchPets(1, search, filters);
     }, 500);
+    
     return () => clearTimeout(timer);
-  }, [search, fetchPets]);
+  }, [search]); // Only trigger when search changes, not on function recreation
 
   const handleFilterChange = (name: keyof typeof filters, value: string) => {
     let newFilters = { ...filters, [name]: value };
