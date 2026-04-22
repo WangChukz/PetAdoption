@@ -456,14 +456,6 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
 
         {/* Data Table Component - lower stacking context */}
         <div className="relative z-0">
-          {loading && (
-            <div className="absolute inset-0 z-30 backdrop-blur-[2px] bg-white/40 flex items-center justify-center transition-all duration-500">
-              <div className="flex flex-col items-center gap-2">
-                <Loader2 className="w-8 h-8 text-[#f08c50] animate-spin" />
-              </div>
-            </div>
-          )}
-
           <div className="overflow-x-auto overflow-y-auto custom-scrollbar max-h-[450px]">
             <table className="w-full text-left border-collapse min-w-[950px]">
               <thead>
