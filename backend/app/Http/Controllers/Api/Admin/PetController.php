@@ -232,31 +232,32 @@ class PetController extends Controller
 
         $pet->update($petData);
 
-        // Update profile flags
-        if ($pet->petProfile) {
-            $profileUpdate = [
-                'is_vaccinated'   => array_key_exists('is_vaccinated', $validated) ? $validated['is_vaccinated'] : $pet->petProfile->is_vaccinated,
-                'is_neutered'     => array_key_exists('is_neutered', $validated) ? $validated['is_neutered'] : $pet->petProfile->is_neutered,
-                'medical_history' => array_key_exists('medical_history', $validated) 
-                    ? (is_string($validated['medical_history']) ? json_decode($validated['medical_history'], true) : $validated['medical_history'])
-                    : $pet->petProfile->medical_history,
-                'location'        => array_key_exists('location', $validated) ? $validated['location'] : $pet->petProfile->location,
-                'intake_date'     => array_key_exists('intake_date', $validated) ? ($validated['intake_date'] ? \Carbon\Carbon::parse($validated['intake_date'])->format('Y-m-d') : null) : $pet->petProfile->intake_date,
-                'microchip'       => array_key_exists('microchip', $validated) ? $validated['microchip'] : $pet->petProfile->microchip,
-                'color'           => array_key_exists('color', $validated) ? $validated['color'] : $pet->petProfile->color,
-                'activity_level'  => array_key_exists('activity_level', $validated) ? $validated['activity_level'] : $pet->petProfile->activity_level,
-                'weight_kg'       => array_key_exists('weight_kg', $validated) ? $validated['weight_kg'] : $pet->petProfile->weight_kg,
-                'foster_name'     => array_key_exists('foster_name', $validated) ? $validated['foster_name'] : $pet->petProfile->foster_name,
-                'foster_email'    => array_key_exists('foster_email', $validated) ? $validated['foster_email'] : $pet->petProfile->foster_email,
-                'foster_phone'    => array_key_exists('foster_phone', $validated) ? $validated['foster_phone'] : $pet->petProfile->foster_phone,
-            ];
+        // Update or create profile flags
+        $profileUpdate = [
+            'is_vaccinated'   => array_key_exists('is_vaccinated', $validated) ? $validated['is_vaccinated'] : ($pet->petProfile->is_vaccinated ?? false),
+            'is_neutered'     => array_key_exists('is_neutered', $validated) ? $validated['is_neutered'] : ($pet->petProfile->is_neutered ?? false),
+            'medical_history' => array_key_exists('medical_history', $validated) 
+                ? (is_string($validated['medical_history']) ? json_decode($validated['medical_history'], true) : $validated['medical_history'])
+                : ($pet->petProfile->medical_history ?? []),
+            'location'        => array_key_exists('location', $validated) ? $validated['location'] : ($pet->petProfile->location ?? null),
+            'intake_date'     => array_key_exists('intake_date', $validated) ? ($validated['intake_date'] ? \Carbon\Carbon::parse($validated['intake_date'])->format('Y-m-d') : null) : ($pet->petProfile->intake_date ?? null),
+            'microchip'       => array_key_exists('microchip', $validated) ? $validated['microchip'] : ($pet->petProfile->microchip ?? null),
+            'color'           => array_key_exists('color', $validated) ? $validated['color'] : ($pet->petProfile->color ?? null),
+            'activity_level'  => array_key_exists('activity_level', $validated) ? $validated['activity_level'] : ($pet->petProfile->activity_level ?? null),
+            'weight_kg'       => array_key_exists('weight_kg', $validated) ? $validated['weight_kg'] : ($pet->petProfile->weight_kg ?? null),
+            'foster_name'     => array_key_exists('foster_name', $validated) ? $validated['foster_name'] : ($pet->petProfile->foster_name ?? null),
+            'foster_email'    => array_key_exists('foster_email', $validated) ? $validated['foster_email'] : ($pet->petProfile->foster_email ?? null),
+            'foster_phone'    => array_key_exists('foster_phone', $validated) ? $validated['foster_phone'] : ($pet->petProfile->foster_phone ?? null),
+        ];
 
-            if ($request->filled('status')) {
-                $profileUpdate['status'] = $request->status;
-            }
-
-            $pet->petProfile->update($profileUpdate);
+        if ($request->filled('status')) {
+            $profileUpdate['status'] = $request->status;
         }
+
+        $pet->petProfile()->updateOrCreate(
+            ['pet_id' => $pet->id],
+            $profileUpdate
+        );
 
         return response()->json(['success' => true, 'data' => $pet->load(['petProfile', 'gallery'])]);
     }
