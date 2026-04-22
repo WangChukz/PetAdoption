@@ -183,9 +183,9 @@ export default function PetProfileGallery({
     <div className="bg-white rounded-[16px] border border-gray-100 p-6 shadow-sm h-full flex flex-col font-vietnam">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <ImageIcon className="w-6 h-6 text-gray-400/80" />
+          <ImageIcon className="w-5 h-5 text-gray-400/80" />
           <div>
-            <h4 className="text-[16px] font-bold text-[#101828]">Bộ sưu tập</h4>
+            <h4 className="text-[15px] font-bold text-slate-800">Bộ sưu tập</h4>
             <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Hình ảnh thực tế</p>
           </div>
         </div>
@@ -221,7 +221,7 @@ export default function PetProfileGallery({
             !isEditing && (
               <div className="col-span-2 py-12 flex flex-col items-center justify-center text-center space-y-3 opacity-40">
                 <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-gray-300">
-                  <ImageIcon className="w-6 h-6" />
+                  <ImageIcon className="w-5 h-5" />
                 </div>
                 <p className="text-[13px] font-medium">Chưa có ảnh trong bộ sưu tập</p>
               </div>

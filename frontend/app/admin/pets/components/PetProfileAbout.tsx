@@ -49,9 +49,9 @@ export default function PetProfileAbout({
   return (
     <div className="bg-white rounded-[16px] border border-gray-100 p-6 shadow-sm space-y-6 h-full flex flex-col font-vietnam">
       <div className="flex items-center gap-3">
-        <FileText className="w-6 h-6 text-gray-400/80" />
+        <FileText className="w-5 h-5 text-gray-400/80" />
         <div>
-          <h3 className="text-[16px] font-bold text-[#101828]">Câu chuyện về {pet.name}</h3>
+          <h3 className="text-[15px] font-bold text-slate-800">Câu chuyện về {pet.name}</h3>
           <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Giới thiệu ngắn gọn</p>
         </div>
       </div>
@@ -67,7 +67,7 @@ export default function PetProfileAbout({
                 }
               }}
               placeholder="Chia sẻ một chút về tính cách hoặc hoàn cảnh của thú cưng (tối đa 1000 ký tự)..."
-              className="w-full flex-1 min-h-[120px] p-4 bg-gray-50/50 border border-gray-100 rounded-xl outline-none focus:border-orange-200 transition-all resize-none text-[14px] leading-relaxed text-gray-600 font-normal"
+              className="w-full flex-1 min-h-[120px] p-4 bg-gray-50/50 border border-gray-100 rounded-xl outline-none focus:border-orange-200 transition-all resize-none text-[13.5px] leading-relaxed text-gray-600 font-normal"
             />
             <div className={`absolute bottom-3 right-3 text-[10px] font-bold px-2 py-1 rounded-md ${
               (editData.description?.length || 0) > 900 ? 'bg-red-50 text-red-400' : 'bg-white/80 text-gray-400'
@@ -76,7 +76,7 @@ export default function PetProfileAbout({
             </div>
           </div>
         ) : (
-          <div className="text-[14px] text-gray-500 leading-loose font-normal italic bg-gray-50/30 p-4 rounded-xl border border-dashed border-gray-100 max-h-[220px] overflow-y-auto custom-scrollbar">
+          <div className="text-[13.5px] text-gray-500 leading-loose font-normal italic bg-gray-50/30 p-4 rounded-xl border border-dashed border-gray-100 max-h-[220px] overflow-y-auto custom-scrollbar">
             {pet.description || "Chưa có câu chuyện nào được chia sẻ. Hãy bổ sung để giúp mọi người dễ dàng kết nối với bé hơn nhé!"}
           </div>
         )}
@@ -85,14 +85,14 @@ export default function PetProfileAbout({
       <div className="space-y-4 pt-2">
         <div className="flex items-center gap-2">
           <Smile className="w-4.5 h-4.5 text-gray-400/80" />
-          <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Đặc điểm nổi bật</h4>
+          <h4 className="text-[12px] font-semibold text-slate-500 tracking-wide tracking-widest">Đặc điểm nổi bật</h4>
         </div>
         <div className="flex flex-wrap gap-2">
           {personalityTags.length > 0 ? (
             personalityTags.map((tag: string, index: number) => (
               <span 
                 key={index}
-                className={`px-3 py-1.5 flex items-center gap-2 text-[#101828] text-[12.5px] font-medium rounded-xl border border-gray-100 transition-all whitespace-nowrap ${
+                className={`px-3 py-1.5 flex items-center gap-2 text-slate-800 text-[12.5px] font-medium rounded-xl border border-gray-100 transition-all whitespace-nowrap ${
                   isEditing ? 'bg-orange-50 border-orange-100 hover:bg-orange-100' : 'bg-white hover:border-orange-200 hover:bg-orange-50/30'
                 }`}
               >

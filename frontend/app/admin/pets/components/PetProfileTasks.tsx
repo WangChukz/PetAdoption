@@ -27,9 +27,9 @@ export default function PetProfileTasks({ pet, refreshData }: PetProfileTasksPro
       {/* Foster Contact */}
       <div className="bg-white rounded-[16px] border border-gray-100 p-6 shadow-sm space-y-6 flex flex-col h-full">
         <div className="flex items-center gap-3">
-          <CheckCircle2 className="w-6 h-6 text-gray-400/80" />
+          <CheckCircle2 className="w-5 h-5 text-gray-400/80" />
           <div>
-            <h3 className="text-[16px] font-bold text-[#101828]">Người chăm sóc</h3>
+            <h3 className="text-[15px] font-bold text-slate-800">Người chăm sóc</h3>
             <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Tình nguyện viên/Foster</p>
           </div>
         </div>
@@ -41,7 +41,7 @@ export default function PetProfileTasks({ pet, refreshData }: PetProfileTasksPro
                 {profile.foster_name.charAt(0)}
               </div>
               <div>
-                <h4 className="font-bold text-[#101828] text-[15px]">{profile.foster_name}</h4>
+                <h4 className="font-bold text-slate-800 text-[15px]">{profile.foster_name}</h4>
                 <div className="flex items-center gap-1.5 mt-1">
                   <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                   <p className="text-[12px] text-gray-400 font-medium italic">Đang phụ trách</p>
@@ -67,9 +67,9 @@ export default function PetProfileTasks({ pet, refreshData }: PetProfileTasksPro
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center py-8 text-center bg-gray-50/30 rounded-2xl border border-dashed border-gray-100">
              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-gray-200 shadow-sm mb-3">
-                <Plus className="w-6 h-6" />
+                <Plus className="w-5 h-5" />
              </div>
-             <p className="text-[14px] text-gray-400 italic">Chưa phân bổ người chăm sóc</p>
+             <p className="text-[13.5px] text-gray-400 italic">Chưa phân bổ người chăm sóc</p>
              <button className="text-[12px] font-bold text-blue-500 mt-3 hover:text-blue-700 underline-offset-4 hover:underline">Phân bổ ngay</button>
           </div>
         )}
@@ -79,9 +79,9 @@ export default function PetProfileTasks({ pet, refreshData }: PetProfileTasksPro
       <div className="bg-white rounded-[16px] border border-gray-100 p-6 shadow-sm space-y-6 flex flex-col h-full">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Bell className="w-6 h-6 text-gray-400/80" />
+            <Bell className="w-5 h-5 text-gray-400/80" />
             <div>
-              <h3 className="text-[16px] font-bold text-[#101828]">Công việc sắp tới</h3>
+              <h3 className="text-[15px] font-bold text-slate-800">Công việc sắp tới</h3>
               <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Lịch trình trong tuần</p>
             </div>
           </div>
@@ -100,7 +100,7 @@ export default function PetProfileTasks({ pet, refreshData }: PetProfileTasksPro
                   {task.status === 'completed' ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
                 </div>
                 <div className="flex-1">
-                  <h4 className={`text-[13.5px] font-bold ${task.status === 'completed' ? 'text-gray-300 line-through' : 'text-[#101828]'}`}>
+                  <h4 className={`text-[13.5px] font-bold ${task.status === 'completed' ? 'text-gray-300 line-through' : 'text-slate-800'}`}>
                     {task.task_name}
                   </h4>
                   <p className="text-[11px] text-gray-400 font-medium mt-0.5">
@@ -115,9 +115,9 @@ export default function PetProfileTasks({ pet, refreshData }: PetProfileTasksPro
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-center py-10 opacity-40">
                <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
-                  <Bell className="w-6 h-6 text-gray-300" />
+                  <Bell className="w-5 h-5 text-gray-300" />
                </div>
-               <p className="text-[14px] font-medium italic">Không có lịch trình sắp tới</p>
+               <p className="text-[13.5px] font-medium italic">Không có lịch trình sắp tới</p>
             </div>
           )}
         </div>

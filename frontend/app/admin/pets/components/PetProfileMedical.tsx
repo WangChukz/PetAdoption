@@ -67,9 +67,9 @@ export default function PetProfileMedical({
     <div className="bg-white rounded-[16px] border border-gray-100 p-6 shadow-sm space-y-6 h-full font-vietnam">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <HeartPulse className="w-6 h-6 text-gray-400/80" />
+          <HeartPulse className="w-5 h-5 text-gray-400/80" />
           <div>
-            <h3 className="text-[16px] font-bold text-[#101828]">Sức khỏe tổng quan</h3>
+            <h3 className="text-[15px] font-bold text-slate-800">Sức khỏe tổng quan</h3>
             <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Hồ sơ y tế gần đây</p>
           </div>
         </div>
@@ -88,7 +88,7 @@ export default function PetProfileMedical({
           <div className="bg-gray-50/50 rounded-xl border border-gray-100 p-4 space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider ml-1">Tiêu đề bản ghi</label>
+                <label className="text-[12px] font-semibold text-slate-500 tracking-wide tracking-wider ml-1">Tiêu đề bản ghi</label>
                 <input 
                   type="text"
                   placeholder="Ví dụ: Tiêm dại định kỳ..."
@@ -98,7 +98,7 @@ export default function PetProfileMedical({
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider ml-1">Ngày thực hiện</label>
+                <label className="text-[12px] font-semibold text-slate-500 tracking-wide tracking-wider ml-1">Ngày thực hiện</label>
                 <ModernDatePicker 
                   value={newDate}
                   onChange={setNewDate}
@@ -108,11 +108,11 @@ export default function PetProfileMedical({
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1.5" id="medical-type-container">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider ml-1">Loại hình</label>
+                <label className="text-[12px] font-semibold text-slate-500 tracking-wide tracking-wider ml-1">Loại hình</label>
                 <MedicalTypeDropdown />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider ml-1">Ghi chú chi tiết</label>
+                <label className="text-[12px] font-semibold text-slate-500 tracking-wide tracking-wider ml-1">Ghi chú chi tiết</label>
                 <input 
                   type="text"
                   placeholder="Hướng dẫn theo dõi hoặc kết quả..."
@@ -171,7 +171,7 @@ export default function PetProfileMedical({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <div className="min-w-0 flex-1">
-                        <h5 className="text-[14px] font-bold text-[#101828] truncate">{record.title}</h5>
+                        <h5 className="text-[13.5px] font-bold text-slate-800 truncate">{record.title}</h5>
                         {record.notes && <p className="text-[12px] text-gray-500 mt-0.5 line-clamp-1">{record.notes}</p>}
                       </div>
                       <div className="flex items-center gap-4 ml-4">
@@ -218,7 +218,7 @@ export default function PetProfileMedical({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <h5 className="text-[14px] font-bold text-[#101828] uppercase tracking-tight">{record.title}</h5>
+                      <h5 className="text-[13.5px] font-bold text-slate-800 uppercase tracking-tight">{record.title}</h5>
                       <span className="text-[12px] font-bold text-gray-400 font-menu bg-white px-2 py-0.5 rounded-full border border-gray-100 italic">
                         {record.date}
                       </span>
@@ -235,10 +235,10 @@ export default function PetProfileMedical({
           ) : (
             <div className="bg-gray-50/50 rounded-[10px] border border-dashed border-gray-200 p-12 flex flex-col items-center justify-center text-center space-y-3">
               <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-gray-300 shadow-sm">
-                <HeartPulse className="w-6 h-6" />
+                <HeartPulse className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-[15px] font-bold text-[#101828] font-menu">Chưa có hồ sơ bệnh án</h4>
+                <h4 className="text-[15px] font-bold text-slate-800 font-menu">Chưa có hồ sơ bệnh án</h4>
                 <p className="text-[13px] text-gray-400 font-menu max-w-[280px]">
                   Ấn nút chỉnh sửa để thêm lịch sử tiêm ngừa và các ghi chú y tế cho thú cưng.
                 </p>

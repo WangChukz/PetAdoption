@@ -103,7 +103,7 @@ export default function PetProfileHeader({
               <div className="p-2 bg-white/20 rounded-full backdrop-blur-sm border border-white/30">
                 <Edit2 className="w-5 h-5 text-white" />
               </div>
-              <span className="text-[10px] text-white font-black mt-2 uppercase tracking-widest">Thay đổi</span>
+              <span className="text-[10px] text-white font-bold mt-2 uppercase tracking-widest">Thay đổi</span>
             </div>
           )}
         </div>
@@ -118,7 +118,7 @@ export default function PetProfileHeader({
                   value={editData.name}
                   onChange={(e) => setEditData({...editData, name: e.target.value})}
                   placeholder="Nhập tên thú cưng..."
-                  className="text-2xl font-bold text-[#101828] font-menu bg-gray-50 border border-gray-100 rounded-[10px] px-4 py-1 outline-none focus:border-orange-200 w-full md:w-auto min-w-[200px]"
+                  className="text-xl font-bold tracking-tight text-slate-800 font-menu bg-gray-50 border border-gray-100 rounded-[10px] px-4 py-1 outline-none focus:border-orange-200 w-full md:w-auto min-w-[200px]"
                 />
                 <div className="relative w-full md:w-auto">
                   <CustomDropdown
@@ -136,7 +136,7 @@ export default function PetProfileHeader({
               </div>
             ) : (
               <div className="flex flex-col md:flex-row items-center gap-3 w-full">
-                <h1 className="text-2xl font-bold text-[#101828] font-menu">{pet.name}</h1>
+                <h1 className="text-xl font-bold tracking-tight text-slate-800 font-menu">{pet.name}</h1>
                 <div className="relative group">
                   <span className={`px-4 py-1.5 text-[11px] font-normal rounded-[10px] tracking-wider ${statusInfo.color} whitespace-nowrap shadow-sm border border-current/10 flex items-center gap-1.5`}>
                     {statusInfo.label}
@@ -252,7 +252,7 @@ export default function PetProfileHeader({
                         age_months: newUnit === 'year' ? currentVal * 12 : currentVal
                       });
                     }}
-                    className="bg-transparent border-none text-[11px] font-bold text-gray-400 outline-none cursor-pointer"
+                    className="bg-transparent border-none text-[12px] font-medium text-slate-500 outline-none cursor-pointer"
                   >
                     <option value="month">th</option>
                     <option value="year">tuổi</option>

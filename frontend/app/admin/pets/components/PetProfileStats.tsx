@@ -40,11 +40,11 @@ export default function PetProfileStats({
 
   return (
     <div className="bg-white rounded-[16px] border border-gray-100 p-6 shadow-sm space-y-6 h-full font-vietnam">
-      <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] font-menu">Số liệu nhanh</h3>
+      <h3 className="text-[12px] font-semibold text-slate-500 tracking-wide tracking-[0.1em] font-menu">Số liệu nhanh</h3>
       
       <div className="space-y-4">
         {/* Vaccinated */}
-        <div className="flex items-center justify-between text-[14px]">
+        <div className="flex items-center justify-between text-[13.5px]">
           <div className="flex items-center gap-3">
             <Syringe className="w-5 h-5 text-gray-400/80" />
             <span className="text-gray-500 font-medium tracking-tight">Tiêm chủng</span>
@@ -74,7 +74,7 @@ export default function PetProfileStats({
         </div>
 
         {/* Neutered */}
-        <div className="flex items-center justify-between text-[14px]">
+        <div className="flex items-center justify-between text-[13.5px]">
           <div className="flex items-center gap-3">
             <Heart className="w-5 h-5 text-gray-400/80" />
             <span className="text-gray-500 font-medium tracking-tight">Triệt sản</span>
@@ -104,7 +104,7 @@ export default function PetProfileStats({
         </div>
 
         {/* Weight */}
-        <div className="flex items-center justify-between text-[14px]">
+        <div className="flex items-center justify-between text-[13.5px]">
           <div className="flex items-center gap-3">
             <Scale className="w-5 h-5 text-gray-400/80" />
             <span className="text-gray-500 font-medium tracking-tight">Cân nặng</span>
@@ -122,12 +122,12 @@ export default function PetProfileStats({
               <span className="text-gray-400 text-[10px] font-bold">KG</span>
             </div>
           ) : (
-            <span className="text-[#101828] font-bold text-[13px] bg-gray-50/50 px-3 py-1.5 rounded-xl border border-gray-100/50">{profile.weight_kg || '0.0'} kg</span>
+            <span className="text-slate-800 font-bold text-[13px] bg-gray-50/50 px-3 py-1.5 rounded-xl border border-gray-100/50">{profile.weight_kg || '0.0'} kg</span>
           )}
         </div>
 
         {/* Age */}
-        <div className="flex items-center justify-between text-[14px]">
+        <div className="flex items-center justify-between text-[13.5px]">
           <div className="flex items-center gap-3">
             <Activity className="w-5 h-5 text-gray-400/80" />
             <span className="text-gray-500 font-medium tracking-tight">Độ tuổi</span>
@@ -175,7 +175,7 @@ export default function PetProfileStats({
               </select>
             </div>
           ) : (
-            <span className="text-[#101828] font-medium font-menu bg-gray-50/50 px-3 py-1 rounded-lg border border-gray-100/50">
+            <span className="text-slate-800 font-medium font-menu bg-gray-50/50 px-3 py-1 rounded-lg border border-gray-100/50">
               {pet.age_months >= 12 
                 ? `${Math.floor(pet.age_months / 12)} tuổi` 
                 : `${pet.age_months || 0} tháng`}
@@ -184,7 +184,7 @@ export default function PetProfileStats({
         </div>
 
         {/* Color */}
-        <div className="flex items-center justify-between text-[14px]">
+        <div className="flex items-center justify-between text-[13.5px]">
           <div className="flex items-center gap-3">
             <Palette className="w-5 h-5 text-gray-400/80" />
             <span className="text-gray-500 font-medium tracking-tight">Màu sắc</span>
@@ -198,7 +198,7 @@ export default function PetProfileStats({
               className="bg-gray-50/50 border border-gray-100 rounded-xl px-3 py-2 text-right outline-none focus:border-orange-200 font-medium font-menu w-32 text-[13px] placeholder:text-gray-300"
             />
           ) : (
-            <span className="text-[#101828] font-medium font-menu bg-gray-50/50 px-3 py-1 rounded-lg border border-gray-100/50">{profile.color || 'Chưa rõ'}</span>
+            <span className="text-slate-800 font-medium font-menu bg-gray-50/50 px-3 py-1 rounded-lg border border-gray-100/50">{profile.color || 'Chưa rõ'}</span>
           )}
         </div>
       </div>
@@ -207,7 +207,7 @@ export default function PetProfileStats({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Activity className="w-5 h-5 text-gray-400/80" />
-            <span className="text-[14px] text-gray-500 font-medium tracking-tight">Mức vận động</span>
+            <span className="text-[13.5px] text-gray-500 font-medium tracking-tight">Mức vận động</span>
           </div>
           {isEditing ? (
             <CustomDropdown
