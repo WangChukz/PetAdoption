@@ -33,5 +33,5 @@ RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
 EXPOSE ${PORT}
 
 # Chạy tự động quá trình tải database (nhất là render không có shell) và sau đó chạy server Web
-CMD php artisan migrate --force && apache2-foreground
+CMD php artisan migrate --force && php artisan db:seed --force && apache2-foreground
 
