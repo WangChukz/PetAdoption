@@ -37,6 +37,7 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
       method: req.method,
       headers,
       body,
+      cache: 'no-store', // Prevent Next.js from aggressively caching the proxied API responses
       // @ts-ignore - duplex is needed for streaming bodies in Node.js
       duplex: 'half',
     });

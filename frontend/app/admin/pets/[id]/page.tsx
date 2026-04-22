@@ -87,11 +87,14 @@ export default function PetDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [id, router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   useEffect(() => {
+    if (!id) return;
     fetchPetData();
-  }, [fetchPetData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -128,7 +131,24 @@ export default function PetDetailPage() {
       if (res.success) {
         toast.success('Cập nhật hồ sơ thành công');
         setIsEditing(false);
-        fetchPetData();
+        setPet(res.data);
+        
+        // Ensure imagePreview is cleared and new gallery is synced
+        setEditData((prev: any) => ({
+          ...prev,
+          imagePreview: undefined,
+          newImageFile: undefined,
+          image_url: res.data.image_url
+        }));
+        
+        if (res.data.gallery) {
+          setGalleryItems(res.data.gallery.map((img: any) => ({
+             id: img.id,
+             preview: getPetImageUrl(img.image_url),
+             isExisting: true
+          })));
+          setDeletedGalleryIds([]);
+        }
       } else {
         toast.error(res.message || 'Lỗi khi cập nhật hồ sơ');
       }

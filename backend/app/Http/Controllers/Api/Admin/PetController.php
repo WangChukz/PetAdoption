@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Pet;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -357,26 +358,35 @@ class PetController extends Controller
         ]);
 
         $ids = $validated['ids'];
-        $pets = Pet::whereIn('id', $ids)->get();
+        $pets = Pet::with(['petProfile', 'gallery', 'adoptionApplications'])->whereIn('id', $ids)->get();
 
         try {
-            foreach ($pets as $pet) {
-                // Delete main image
-                if ($pet->image_url) {
-                    \App\Helpers\UploadHelper::delete($pet->image_url);
-                }
-
-                // Delete gallery images
-                foreach ($pet->gallery as $image) {
-                    if ($image->image_url) {
-                        \App\Helpers\UploadHelper::delete($image->image_url);
+            DB::transaction(function () use ($pets) {
+                foreach ($pets as $pet) {
+                    // 1. Delete cloud images first (non-DB, best-effort)
+                    if ($pet->image_url) {
+                        try { \App\Helpers\UploadHelper::delete($pet->image_url); } catch (\Exception $e) {}
                     }
-                }
+                    foreach ($pet->gallery as $image) {
+                        if ($image->image_url) {
+                            try { \App\Helpers\UploadHelper::delete($image->image_url); } catch (\Exception $e) {}
+                        }
+                    }
 
-                // Adoption applications and profiles are handled by cascade or manual delete
-                $pet->adoptionApplications()->delete();
-                $pet->delete();
-            }
+                    // 2. Delete related records that may block FK constraints
+                    if ($pet->petProfile) {
+                        $pet->petProfile->auditTrails()->delete();
+                        $pet->petProfile->careLogs()->delete();
+                        $pet->petProfile->careTasks()->delete();
+                        $pet->petProfile->forceDelete();
+                    }
+                    $pet->adoptionApplications()->forceDelete();
+                    $pet->gallery()->delete();
+
+                    // 3. Delete the pet itself
+                    $pet->delete();
+                }
+            });
 
             return response()->json([
                 'success' => true,
@@ -393,22 +403,32 @@ class PetController extends Controller
     public function destroy(Pet $pet): JsonResponse
     {
         try {
-            if ($pet->image_url) {
-                \App\Helpers\UploadHelper::delete($pet->image_url);
-            }
+            $pet->load(['petProfile', 'gallery', 'adoptionApplications']);
 
-            // Delete gallery images
-            foreach ($pet->gallery as $image) {
-                if ($image->image_url) {
-                    \App\Helpers\UploadHelper::delete($image->image_url);
+            DB::transaction(function () use ($pet) {
+                // 1. Delete cloud images first (non-DB, best-effort)
+                if ($pet->image_url) {
+                    try { \App\Helpers\UploadHelper::delete($pet->image_url); } catch (\Exception $e) {}
                 }
-            }
+                foreach ($pet->gallery as $image) {
+                    if ($image->image_url) {
+                        try { \App\Helpers\UploadHelper::delete($image->image_url); } catch (\Exception $e) {}
+                    }
+                }
 
-            // Delete associated adoption applications (missing cascade in migration)
-            $pet->adoptionApplications()->delete();
+                // 2. Delete related records that may block FK constraints
+                if ($pet->petProfile) {
+                    $pet->petProfile->auditTrails()->delete();
+                    $pet->petProfile->careLogs()->delete();
+                    $pet->petProfile->careTasks()->delete();
+                    $pet->petProfile->forceDelete();
+                }
+                $pet->adoptionApplications()->forceDelete();
+                $pet->gallery()->delete();
 
-            // Delete the pet (database cascade will handle petProfile and its children)
-            $pet->delete();
+                // 3. Delete the pet itself
+                $pet->delete();
+            });
 
             return response()->json([
                 'success' => true,

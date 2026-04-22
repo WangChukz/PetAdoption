@@ -122,7 +122,7 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
         end_date: currentFilters.end_date,
       });
 
-      const res = await fetch(`/api/admin/pets?${query.toString()}`);
+      const res = await fetch(`/api/admin/pets?${query.toString()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       
       const json = await res.json();

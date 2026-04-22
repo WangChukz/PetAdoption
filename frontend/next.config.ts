@@ -20,6 +20,10 @@ const nextConfig: NextConfig = {
         hostname: 'hanoipetadoption.com',
       },
       {
+        protocol: 'https',
+        hostname: 'thuythithi.com',
+      },
+      {
         protocol: 'http',
         hostname: '127.0.0.1',
         port: '8000',
