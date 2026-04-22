@@ -23,7 +23,7 @@ COPY . /var/www/html
 
 # Cài đặt Composer và các gói
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Phân quyền cho Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
@@ -33,3 +33,4 @@ EXPOSE ${PORT}
 
 # Chạy Apache
 CMD ["apache2-foreground"]
+
