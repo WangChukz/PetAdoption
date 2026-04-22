@@ -183,7 +183,7 @@ export default function PetListingClient({ initialData, statusMap }: Props) {
 
     const timer = setTimeout(() => {
       fetchPets(1, search, filters);
-    }, 500);
+    }, 50);
     
     return () => clearTimeout(timer);
   }, [search]); // Only trigger when search changes, not on function recreation
