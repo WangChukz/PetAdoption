@@ -32,6 +32,6 @@ RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
 # Mở cổng
 EXPOSE ${PORT}
 
-# Chạy Apache
-CMD ["apache2-foreground"]
+# Chạy tự động quá trình tải database (nhất là render không có shell) và sau đó chạy server Web
+CMD php artisan migrate --force && apache2-foreground
 
