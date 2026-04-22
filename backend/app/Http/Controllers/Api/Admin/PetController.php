@@ -235,20 +235,20 @@ class PetController extends Controller
         // Update profile flags
         if ($pet->petProfile) {
             $profileUpdate = [
-                'is_vaccinated'   => $request->has('is_vaccinated') ? $request->boolean('is_vaccinated') : $pet->petProfile->is_vaccinated,
-                'is_neutered'     => $request->has('is_neutered') ? $request->boolean('is_neutered') : $pet->petProfile->is_neutered,
-                'medical_history' => $request->has('medical_history') 
-                    ? (is_string($request->medical_history) ? json_decode($request->medical_history, true) : $request->medical_history)
+                'is_vaccinated'   => array_key_exists('is_vaccinated', $validated) ? $validated['is_vaccinated'] : $pet->petProfile->is_vaccinated,
+                'is_neutered'     => array_key_exists('is_neutered', $validated) ? $validated['is_neutered'] : $pet->petProfile->is_neutered,
+                'medical_history' => array_key_exists('medical_history', $validated) 
+                    ? (is_string($validated['medical_history']) ? json_decode($validated['medical_history'], true) : $validated['medical_history'])
                     : $pet->petProfile->medical_history,
-                'location'        => $request->get('location', $pet->petProfile->location),
-                'intake_date'     => $request->get('intake_date', $pet->petProfile->intake_date),
-                'microchip'       => $request->get('microchip', $pet->petProfile->microchip),
-                'color'           => $request->get('color', $pet->petProfile->color),
-                'activity_level'  => $request->get('activity_level', $pet->petProfile->activity_level),
-                'weight_kg'       => $request->get('weight_kg', $pet->petProfile->weight_kg),
-                'foster_name'     => $request->get('foster_name', $pet->petProfile->foster_name),
-                'foster_email'    => $request->get('foster_email', $pet->petProfile->foster_email),
-                'foster_phone'    => $request->get('foster_phone', $pet->petProfile->foster_phone),
+                'location'        => array_key_exists('location', $validated) ? $validated['location'] : $pet->petProfile->location,
+                'intake_date'     => array_key_exists('intake_date', $validated) ? ($validated['intake_date'] ? \Carbon\Carbon::parse($validated['intake_date'])->format('Y-m-d') : null) : $pet->petProfile->intake_date,
+                'microchip'       => array_key_exists('microchip', $validated) ? $validated['microchip'] : $pet->petProfile->microchip,
+                'color'           => array_key_exists('color', $validated) ? $validated['color'] : $pet->petProfile->color,
+                'activity_level'  => array_key_exists('activity_level', $validated) ? $validated['activity_level'] : $pet->petProfile->activity_level,
+                'weight_kg'       => array_key_exists('weight_kg', $validated) ? $validated['weight_kg'] : $pet->petProfile->weight_kg,
+                'foster_name'     => array_key_exists('foster_name', $validated) ? $validated['foster_name'] : $pet->petProfile->foster_name,
+                'foster_email'    => array_key_exists('foster_email', $validated) ? $validated['foster_email'] : $pet->petProfile->foster_email,
+                'foster_phone'    => array_key_exists('foster_phone', $validated) ? $validated['foster_phone'] : $pet->petProfile->foster_phone,
             ];
 
             if ($request->filled('status')) {
