@@ -26,3 +26,10 @@ backend/vendor/
 backend/public/storage
 backend/storage/*.key
 backend/bootstrap/cache/
+
+# === Log & Debug files (không push lên GitHub) ===
+backend/*.txt
+backend/*.log
+backend/debug-*.php
+backend/test-*.php
+backend/create_admin.php
